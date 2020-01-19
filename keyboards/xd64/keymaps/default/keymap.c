@@ -8,7 +8,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,   KC_T,   KC_Y,    KC_U,   KC_I,    KC_O,    KC_P,    KC_LBRC,  KC_RBRC, KC_BSLS, \
       KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,   KC_G,   KC_H,    KC_J,   KC_K,    KC_L,    KC_SCLN, KC_QUOT,  KC_ENT,           \
       KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,   KC_B,   KC_N,    KC_M,   KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,                    \
-      MO(1),   KC_LGUI, KC_LALT,                          KC_RCTL, KC_SPC,                   KC_RALT, KC_RGUI,  KC_APP,  KC_RCTL  ),
+      MO(1),   KC_LGUI, KC_LALT,                          KC_F24,  KC_SPC,                   KC_RALT, KC_RGUI,  KC_APP,  KC_RCTL  ),
 
   // 1: Function Layer
   LAYOUT_64_ansi_split_noarrow(
@@ -16,7 +16,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,  KC_NO,  KC_HOME, KC_PGDN, KC_PGUP, KC_END,   KC_PSCR, KC_NO,   KC_BRK,  KC_NO,  \
       KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,  KC_NO,  KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT, KC_INS,  KC_DEL,  KC_ENT,          \
       KC_LSFT, KC_NO,   KC_NO,   KC_NO,   KC_NO,  KC_NO,  KC_NO,   KC_NO,   KC_NO,   KC_NO,    KC_NO,   KC_NO,                    \
-      MO(1),   KC_NO,   KC_NO,                            LALT(KC_GRV),  KC_SPC,               KC_NO,   KC_NO,   KC_NO,   KC_NO   )
+      MO(1),   KC_NO,   KC_NO,           RCTL(RSFT(KC_F14)), RCTL(RSFT(KC_F13)),               KC_NO,   KC_NO,   KC_NO,   KC_NO   )
 
 };
 
