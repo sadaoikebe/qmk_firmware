@@ -1,6 +1,13 @@
-# XD64 VER3 split spacebar 用 親指シフトキーマップ (NICOLA配列)
+# XD64 VER3.0 split spacebar 用 親指シフトキーマップ (NICOLA配列)
 
 ソフトウェアをインストールせずにキーボードのみで親指シフトするためのキーマップです。
+
+## PCB XD64 VER3.0 を想定
+一般的な60% keyboardの配列で、最下段のAltとSpaceを変更する  
+| Alt 1.25U | Space Convex 6.25U |  
+↓  
+| Alt 1.5U | Space Convex 3U | Space Convex 3U |  
+Alt 1.5U のキーはキーがたくさん入っているキートップセットなら含まれている。  Convex 3UはMINILA用のものが使える。2つ必要なので一つは単独で買う必要がありそう。
 
 ### 主な機能
 
