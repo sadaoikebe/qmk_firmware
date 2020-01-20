@@ -29,8 +29,7 @@ void keypress_timer_init(keypress_timer_expired_func_t _clbk) {
     TCCR1B = (1<< CS12) | (1<< CS10); // clock /1024
 	TCCR1C = 0; // not forcing output compare
     TCNT1 = 0; // set timer counter initial value (16 bit value)
-    OCR1A = 0;
-	TIMSK1 = 0; // disable timer compare match 1A interrupt
+    OCR1A = 0xffff;
 	sei(); // enable interrupts
 }
 
@@ -44,6 +43,5 @@ void keypress_timer_start(uint16_t count) {
 
 ISR(TIMER1_COMPA_vect) // 16 bit timer 1 compare 1A match
 {
-	TIMSK1 = 0; // disable timer compare match 1A interrupt
     callback();
 }
