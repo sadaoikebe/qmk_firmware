@@ -13,18 +13,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/*
+ * introduced NICOLA state machine
+ * (C) 2020 Sadao Ikebe @bonyarou
+ */
 
 #include QMK_KEYBOARD_H
 #include "nicola.h"
+#include "key_duration.h"
+#include <timer.h>
 
 static bool is_nicola = false; // 親指シフトがオンかオフか
 static uint8_t nicola_layer = 0; // レイヤー番号
 static uint8_t n_modifier = 0; // 押しているmodifierキーの数
 
-#include <timer.h>
-
-#define TIMEOUT_THRESHOLD 150
-#define OVERLAP_THRESHOLD 20
+#define TIMEOUT_THRESHOLD (150)
+#define OVERLAP_THRESHOLD (20)
 
 typedef enum {
   NICOLA_STATE_S1_INIT,
@@ -40,9 +44,22 @@ static int nicola_o_key;
 static uint16_t nicola_m_time;
 static uint16_t nicola_o_time;
 
+static int key_process_guard = 0;
+void keypress_timer_expired(void);
+
+// if we have independent timeout routine, no need to check timeout on key press
+#ifdef TIMEOUT_INTERRUPT
+#define IF_TIMEOUT(x) if(0)
+#else
+#define IF_TIMEOUT(x) if(x)
+#endif
+
 // 親指シフトのレイヤー、シフトキーを設定
 void set_nicola(uint8_t layer) {
   nicola_layer = layer;
+#ifdef TIMEOUT_INTERRUPT
+  keypress_timer_init(keypress_timer_expired);
+#endif
 }
 
 // 親指シフトをオンオフ
@@ -72,6 +89,7 @@ bool nicola_state(void) {
 // バッファをクリアする
 void nicola_clear(void) {
   nicola_int_state = NICOLA_STATE_S1_INIT;
+  key_process_guard = 0;
 }
 
 // 入力モードか編集モードかを確認する
@@ -221,6 +239,8 @@ void nicola_om_type(void) {
 
 // 親指シフトの入力処理
 bool process_nicola(uint16_t keycode, keyrecord_t *record) {
+  key_process_guard = 1; // timeout entrance guard
+  bool cont_process = true;
   // if (!is_nicola || n_modifier > 0) return true;
   uint16_t curr_time = timer_read();
 
@@ -238,7 +258,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             break;
           case NICOLA_STATE_S3_O:
             // timeout check
-            if(curr_time - nicola_o_time > TIMEOUT_THRESHOLD) {
+            IF_TIMEOUT(curr_time - nicola_o_time > TIMEOUT_THRESHOLD) {
               // timeout => (output O) => S2
               nicola_o_type();
               nicola_int_state = NICOLA_STATE_S2_M;
@@ -249,7 +269,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             break;
           case NICOLA_STATE_S4_MO:
             // timeout check
-            if(curr_time - nicola_o_time > TIMEOUT_THRESHOLD) {
+            IF_TIMEOUT(curr_time - nicola_o_time > TIMEOUT_THRESHOLD) {
               // timeout => (output MO) => S2
               nicola_om_type();
               nicola_int_state = NICOLA_STATE_S2_M;
@@ -276,7 +296,8 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
         }
         nicola_m_key = keycode;
         nicola_m_time = curr_time;
-        return false;
+        keypress_timer_start(TIMEOUT_THRESHOLD * 16);
+        cont_process = false;
     } else if(keycode == NG_SHFTL || keycode == NG_SHFTR) {
         // O key
         switch(nicola_int_state) {
@@ -286,7 +307,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             break;
           case NICOLA_STATE_S2_M:
             // timeout check
-            if(curr_time - nicola_m_time > TIMEOUT_THRESHOLD) {
+            IF_TIMEOUT(curr_time - nicola_m_time > TIMEOUT_THRESHOLD) {
               // timeout => (output M) => S3
               nicola_m_type();
               nicola_int_state = NICOLA_STATE_S3_O;
@@ -306,7 +327,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             break;
           case NICOLA_STATE_S5_OM:
             // timeout check
-            if(curr_time - nicola_m_time > TIMEOUT_THRESHOLD) {
+            IF_TIMEOUT(curr_time - nicola_m_time > TIMEOUT_THRESHOLD) {
               // timeout => (output MO) => S3
               nicola_om_type();
               nicola_int_state = NICOLA_STATE_S3_O;
@@ -328,7 +349,8 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
         }
         nicola_o_key = keycode;
         nicola_o_time = curr_time;
-        return false;
+        keypress_timer_start(TIMEOUT_THRESHOLD * 16);
+        cont_process = false;
     } else {
         // その他のキーが押された
         switch(nicola_int_state) {
@@ -348,6 +370,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             break;
         }
         nicola_int_state = NICOLA_STATE_S1_INIT;
+        key_process_guard = 0;
         // continue processing current key, so this path returns true
     }
   } else { // key release
@@ -408,9 +431,31 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             }
             break;
         }
-        return false;
+        cont_process = false;
     }
   }
-  return true;
+  key_process_guard = 0;
+  return cont_process;
 }
 
+void keypress_timer_expired(void) {
+    if(!key_process_guard) {
+        switch(nicola_int_state) {
+            case NICOLA_STATE_S1_INIT:
+                break;
+            case NICOLA_STATE_S2_M:
+                nicola_m_type();
+                break;
+            case NICOLA_STATE_S3_O:
+                nicola_o_type();
+                break;
+            case NICOLA_STATE_S4_MO:
+                nicola_om_type();
+                break;
+            case NICOLA_STATE_S5_OM:
+                nicola_om_type();
+                break;
+        }
+        nicola_int_state = NICOLA_STATE_S1_INIT;
+    }
+}
