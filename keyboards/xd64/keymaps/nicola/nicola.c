@@ -17,223 +17,28 @@
 #include QMK_KEYBOARD_H
 #include "nicola.h"
 
-#if !defined(__AVR__)
-  #include <string.h>
-  #define memcpy_P(des, src, len) memcpy(des, src, len)
-#endif
-
-#define NGBUFFER 5 // バッファのサイズ
-
-static uint8_t ng_chrcount = 0; // 文字キー入力のカウンタ (シフトキー含む)
 static bool is_nicola = false; // 親指シフトがオンかオフか
 static uint8_t nicola_layer = 0; // レイヤー番号
 static uint8_t n_modifier = 0; // 押しているmodifierキーの数
-static uint32_t keycomb = 0UL; // 同時押しの状態を示す。32bitの各ビットがキーに対応する。
 
-// 31キーを32bitの各ビットに割り当てる
-#define B_Q    (1UL<<0)
-#define B_W    (1UL<<1)
-#define B_E    (1UL<<2)
-#define B_R    (1UL<<3)
-#define B_T    (1UL<<4)
+#include <timer.h>
 
-#define B_Y    (1UL<<5)
-#define B_U    (1UL<<6)
-#define B_I    (1UL<<7)
-#define B_O    (1UL<<8)
-#define B_P    (1UL<<9)
+#define TIMEOUT_THRESHOLD 150
+#define OVERLAP_THRESHOLD 20
 
-#define B_A    (1UL<<10)
-#define B_S    (1UL<<11)
-#define B_D    (1UL<<12)
-#define B_F    (1UL<<13)
-#define B_G    (1UL<<14)
+typedef enum {
+  NICOLA_STATE_S1_INIT,
+  NICOLA_STATE_S2_M,
+  NICOLA_STATE_S3_O,
+  NICOLA_STATE_S4_MO,
+  NICOLA_STATE_S5_OM
+} nicola_state_t;
 
-#define B_H    (1UL<<15)
-#define B_J    (1UL<<16)
-#define B_K    (1UL<<17)
-#define B_L    (1UL<<18)
-#define B_SCLN (1UL<<19)
-
-#define B_Z    (1UL<<20)
-#define B_X    (1UL<<21)
-#define B_C    (1UL<<22)
-#define B_V    (1UL<<23)
-#define B_B    (1UL<<24)
-
-#define B_N    (1UL<<25)
-#define B_M    (1UL<<26)
-#define B_COMM (1UL<<27)
-#define B_DOT  (1UL<<28)
-#define B_SLSH (1UL<<29)
-
-#define B_SHFTL (1UL<<30)
-#define B_SHFTR (1UL<<31)
-
-// 文字入力バッファ
-static uint16_t ninputs[NGBUFFER];
-
-// キーコードとキービットの対応
-// メモリ削減のため配列はNG_Qを0にしている
-const uint32_t ng_key[] = {
-  [NG_Q    - NG_Q] = B_Q,
-  [NG_W    - NG_Q] = B_W,
-  [NG_E    - NG_Q] = B_E,
-  [NG_R    - NG_Q] = B_R,
-  [NG_T    - NG_Q] = B_T,
-
-  [NG_Y    - NG_Q] = B_Y,
-  [NG_U    - NG_Q] = B_U,
-  [NG_I    - NG_Q] = B_I,
-  [NG_O    - NG_Q] = B_O,
-  [NG_P    - NG_Q] = B_P,
-
-  [NG_A    - NG_Q] = B_A,
-  [NG_S    - NG_Q] = B_S,
-  [NG_D    - NG_Q] = B_D,
-  [NG_F    - NG_Q] = B_F,
-  [NG_G    - NG_Q] = B_G,
-
-  [NG_H    - NG_Q] = B_H,
-  [NG_J    - NG_Q] = B_J,
-  [NG_K    - NG_Q] = B_K,
-  [NG_L    - NG_Q] = B_L,
-  [NG_SCLN - NG_Q] = B_SCLN,
-
-  [NG_Z    - NG_Q] = B_Z,
-  [NG_X    - NG_Q] = B_X,
-  [NG_C    - NG_Q] = B_C,
-  [NG_V    - NG_Q] = B_V,
-  [NG_B    - NG_Q] = B_B,
-
-  [NG_N    - NG_Q] = B_N,
-  [NG_M    - NG_Q] = B_M,
-  [NG_COMM - NG_Q] = B_COMM,
-  [NG_DOT  - NG_Q] = B_DOT,
-  [NG_SLSH - NG_Q] = B_SLSH,
-
-  [NG_SHFTL - NG_Q] = B_SHFTL,
-  [NG_SHFTR - NG_Q] = B_SHFTR,
-};
-
-// 親指シフトカナ変換テーブル
-typedef struct {
-  uint32_t key;
-  char kana[4];
-} nicola_keymap;
-
-const PROGMEM nicola_keymap ngmap[] = {
-  // 単独
-  {.key = B_Q               , .kana = "."},
-  {.key = B_W               , .kana = "ka"},
-  {.key = B_E               , .kana = "ta"},
-  {.key = B_R               , .kana = "ko"},
-  {.key = B_T               , .kana = "sa"},
-  {.key = B_Y               , .kana = "ra"},
-  {.key = B_U               , .kana = "ti"},
-  {.key = B_I               , .kana = "ku"},
-  {.key = B_O               , .kana = "tu"},
-  {.key = B_P               , .kana = ","},
-
-  {.key = B_A               , .kana = "u"},
-  {.key = B_S               , .kana = "si"},
-  {.key = B_D               , .kana = "te"},
-  {.key = B_F               , .kana = "ke"},
-  {.key = B_G               , .kana = "se"},
-  {.key = B_H               , .kana = "ha"},
-  {.key = B_J               , .kana = "to"},
-  {.key = B_K               , .kana = "ki"},
-  {.key = B_L               , .kana = "i"},
-  {.key = B_SCLN            , .kana = "nn"},
-
-  {.key = B_Z               , .kana = "."},
-  {.key = B_X               , .kana = "hi"},
-  {.key = B_C               , .kana = "su"},
-  {.key = B_V               , .kana = "hu"},
-  {.key = B_B               , .kana = "he"},
-  {.key = B_N               , .kana = "me"},
-  {.key = B_M               , .kana = "so"},
-  {.key = B_COMM            , .kana = "ne"},
-  {.key = B_DOT             , .kana = "ho"},
-  {.key = B_SLSH            , .kana = "/"},
-
-  // Shift and space
-  {.key = B_SHFTL           , .kana = " "},
-  {.key = B_SHFTR           , .kana = " "},
-
-  // Shift and Henkan/Muhenkan
-  // {.key = B_SHFTL           , .kana = SS_TAP(X_INT5)},
-  // {.key = B_SHFTR           , .kana = SS_TAP(X_INT4)},
-
-  // 左シフト
-  {.key = B_SHFTL|B_Q       , .kana = "la"},
-  {.key = B_SHFTL|B_W       , .kana = "e"},
-  {.key = B_SHFTL|B_E       , .kana = "ri"},
-  {.key = B_SHFTL|B_R       , .kana = "lya"},
-  {.key = B_SHFTL|B_T       , .kana = "re"},
-  {.key = B_SHFTL|B_Y       , .kana = "pa"},
-  {.key = B_SHFTL|B_U       , .kana = "di"},
-  {.key = B_SHFTL|B_I       , .kana = "gu"},
-  {.key = B_SHFTL|B_O       , .kana = "du"},
-  {.key = B_SHFTL|B_P       , .kana = "pi"},
-
-  {.key = B_SHFTL|B_A       , .kana = "wo"},
-  {.key = B_SHFTL|B_S       , .kana = "a"},
-  {.key = B_SHFTL|B_D       , .kana = "na"},
-  {.key = B_SHFTL|B_F       , .kana = "lyu"},
-  {.key = B_SHFTL|B_G       , .kana = "mo"},
-  {.key = B_SHFTL|B_H       , .kana = "ba"},
-  {.key = B_SHFTL|B_J       , .kana = "do"},
-  {.key = B_SHFTL|B_K       , .kana = "gi"},
-  {.key = B_SHFTL|B_L       , .kana = "po"},
-  {.key = B_SHFTL|B_SCLN    , .kana = ""},
-
-  {.key = B_SHFTL|B_Z       , .kana = "lu"},
-  {.key = B_SHFTL|B_X       , .kana = "-"},
-  {.key = B_SHFTL|B_C       , .kana = "ro"},
-  {.key = B_SHFTL|B_V       , .kana = "ya"},
-  {.key = B_SHFTL|B_B       , .kana = "li"},
-  {.key = B_SHFTL|B_N       , .kana = "pu"},
-  {.key = B_SHFTL|B_M       , .kana = "zo"},
-  {.key = B_SHFTL|B_COMM    , .kana = "pe"},
-  {.key = B_SHFTL|B_DOT     , .kana = "bo"},
-  {.key = B_SHFTL|B_SLSH    , .kana = "?"},
-
-  // 右シフト
-  {.key = B_SHFTR|B_Q       , .kana = ""},
-  {.key = B_SHFTR|B_W       , .kana = "ga"},
-  {.key = B_SHFTR|B_E       , .kana = "da"},
-  {.key = B_SHFTR|B_R       , .kana = "go"},
-  {.key = B_SHFTR|B_T       , .kana = "za"},
-  {.key = B_SHFTR|B_Y       , .kana = "yo"},
-  {.key = B_SHFTR|B_U       , .kana = "ni"},
-  {.key = B_SHFTR|B_I       , .kana = "ru"},
-  {.key = B_SHFTR|B_O       , .kana = "ma"},
-  {.key = B_SHFTR|B_P       , .kana = "le"},
-
-  {.key = B_SHFTR|B_A       , .kana = "vu"},
-  {.key = B_SHFTR|B_S       , .kana = "zi"},
-  {.key = B_SHFTR|B_D       , .kana = "de"},
-  {.key = B_SHFTR|B_F       , .kana = "ge"},
-  {.key = B_SHFTR|B_G       , .kana = "ze"},
-  {.key = B_SHFTR|B_H       , .kana = "mi"},
-  {.key = B_SHFTR|B_J       , .kana = "o"},
-  {.key = B_SHFTR|B_K       , .kana = "no"},
-  {.key = B_SHFTR|B_L       , .kana = "lyo"},
-  {.key = B_SHFTR|B_SCLN    , .kana = "ltu"},
-
-  {.key = B_SHFTR|B_Z       , .kana = ""},
-  {.key = B_SHFTR|B_X       , .kana = "bi"},
-  {.key = B_SHFTR|B_C       , .kana = "zu"},
-  {.key = B_SHFTR|B_V       , .kana = "bu"},
-  {.key = B_SHFTR|B_B       , .kana = "be"},
-  {.key = B_SHFTR|B_N       , .kana = "nu"},
-  {.key = B_SHFTR|B_M       , .kana = "yu"},
-  {.key = B_SHFTR|B_COMM    , .kana = "mu"},
-  {.key = B_SHFTR|B_DOT     , .kana = "wa"},
-  {.key = B_SHFTR|B_SLSH    , .kana = "lo"},
-
-};
+static nicola_state_t nicola_int_state = NICOLA_STATE_S1_INIT;
+static int nicola_m_key;
+static int nicola_o_key;
+static uint16_t nicola_m_time;
+static uint16_t nicola_o_time;
 
 // 親指シフトのレイヤー、シフトキーを設定
 void set_nicola(uint8_t layer) {
@@ -243,22 +48,20 @@ void set_nicola(uint8_t layer) {
 // 親指シフトをオンオフ
 void nicola_on(void) {
   is_nicola = true;
-  keycomb = 0UL;
   nicola_clear();
   layer_on(nicola_layer);
 
-  tap_code(KC_LANG1); // Mac
-  tap_code(KC_HENK); // Win
+//   tap_code(KC_LANG1); // Mac
+//   tap_code(KC_HENK); // Win
 }
 
 void nicola_off(void) {
   is_nicola = false;
-  keycomb = 0UL;
   nicola_clear();
   layer_off(nicola_layer);
 
-  tap_code(KC_LANG2); // Mac
-  tap_code(KC_MHEN); // Win
+//   tap_code(KC_LANG2); // Mac
+//   tap_code(KC_MHEN); // Win
 }
 
 // 親指シフトの状態
@@ -266,58 +69,9 @@ bool nicola_state(void) {
   return is_nicola;
 }
 
-// キー入力を文字に変換して出力する
-void nicola_type(void) {
-  nicola_keymap bngmap; // PROGMEM buffer
-
-  bool douji = false; // 同時押しか連続押しか
-  uint32_t skey = 0; // 連続押しの場合のバッファ
-
-  switch (keycomb) {
-    // send_stringできないキー、長すぎるマクロはここで定義
-    // case B_F|B_G:
-    //   nicola_off();
-    //   break;
-    default:
-      // キーから仮名に変換して出力する。
-      // 同時押しの場合 ngmapに定義されている
-      for (int i = 0; i < sizeof ngmap / sizeof bngmap; i++) {
-        memcpy_P(&bngmap, &ngmap[i], sizeof(bngmap));
-        if (keycomb == bngmap.key) {
-          douji = true;
-          send_string(bngmap.kana);
-          break;
-        }
-      }
-      // 連続押しの場合 ngmapに定義されていない
-      if (!douji) {
-        for (int j = 0; j < ng_chrcount; j++) {
-          skey = ng_key[ninputs[j] - NG_Q];
-          if ((keycomb & B_SHFTL) > 0) skey |= B_SHFTL; // シフトキー状態を反映
-          if ((keycomb & B_SHFTR) > 0) skey |= B_SHFTR; // シフトキー状態を反映
-          for (int i = 0; i < sizeof ngmap / sizeof bngmap; i++) {
-            memcpy_P(&bngmap, &ngmap[i], sizeof(bngmap));
-            if (skey == bngmap.key) {
-              send_string(bngmap.kana);
-              break;
-            }
-          }
-        }
-      }
-  }
-
-  nicola_clear(); // バッファを空にする
-}
-
 // バッファをクリアする
 void nicola_clear(void) {
-  for (int i = 0; i < NGBUFFER; i++) {
-    ninputs[i] = 0;
-  }
-  ng_chrcount = 0;
-  #ifndef NICOLA_RENZOKU // 連続シフト、シフト押しっぱなしで入力可能
-    keycomb = 0UL;
-  #endif
+  nicola_int_state = NICOLA_STATE_S1_INIT;
 }
 
 // 入力モードか編集モードかを確認する
@@ -348,33 +102,313 @@ void nicola_mode(uint16_t keycode, keyrecord_t *record) {
 
 }
 
+void nicola_m_type(void) {
+    switch(nicola_m_key) {
+        case NG_Q   : send_string("." ); break;
+        case NG_W   : send_string("ka"); break;
+        case NG_E   : send_string("ta"); break;
+        case NG_R   : send_string("ko"); break;
+        case NG_T   : send_string("sa"); break;
+        case NG_Y   : send_string("ra"); break;
+        case NG_U   : send_string("ti"); break;
+        case NG_I   : send_string("ku"); break;
+        case NG_O   : send_string("tu"); break;
+        case NG_P   : send_string("," ); break;
+
+        case NG_A   : send_string("u" ); break;
+        case NG_S   : send_string("si"); break;
+        case NG_D   : send_string("te"); break;
+        case NG_F   : send_string("ke"); break;
+        case NG_G   : send_string("se"); break;
+        case NG_H   : send_string("ha"); break;
+        case NG_J   : send_string("to"); break;
+        case NG_K   : send_string("ki"); break;
+        case NG_L   : send_string("i" ); break;
+        case NG_SCLN: send_string("nn"); break;
+
+        case NG_Z   : send_string("." ); break;
+        case NG_X   : send_string("hi"); break;
+        case NG_C   : send_string("su"); break;
+        case NG_V   : send_string("hu"); break;
+        case NG_B   : send_string("he"); break;
+        case NG_N   : send_string("me"); break;
+        case NG_M   : send_string("so"); break;
+        case NG_COMM: send_string("ne"); break;
+        case NG_DOT : send_string("ho"); break;
+        case NG_SLSH: send_string("/" ); break;
+    }
+}
+
+void nicola_o_type(void) {
+    if(nicola_o_key != 0) {
+        send_string(" ");
+    }
+}
+
+void nicola_om_type(void) {
+    if(nicola_o_key == NG_SHFTL) {
+        switch(nicola_m_key) {
+            case NG_Q   : send_string("la"); break;
+            case NG_W   : send_string("e" ); break;
+            case NG_E   : send_string("ri"); break;
+            case NG_R   : send_string("lya");break;
+            case NG_T   : send_string("re"); break;
+            case NG_Y   : send_string("pa"); break;
+            case NG_U   : send_string("di"); break;
+            case NG_I   : send_string("gu"); break;
+            case NG_O   : send_string("du"); break;
+            case NG_P   : send_string("pi"); break;
+
+            case NG_A   : send_string("wo"); break;
+            case NG_S   : send_string("a" ); break;
+            case NG_D   : send_string("na"); break;
+            case NG_F   : send_string("lyu");break;
+            case NG_G   : send_string("mo"); break;
+            case NG_H   : send_string("ba"); break;
+            case NG_J   : send_string("do"); break;
+            case NG_K   : send_string("gi"); break;
+            case NG_L   : send_string("po"); break;
+            case NG_SCLN: send_string(""  ); break;
+
+            case NG_Z   : send_string("lu"); break;
+            case NG_X   : send_string("-" ); break;
+            case NG_C   : send_string("ro"); break;
+            case NG_V   : send_string("ya"); break;
+            case NG_B   : send_string("li"); break;
+            case NG_N   : send_string("pu"); break;
+            case NG_M   : send_string("zo"); break;
+            case NG_COMM: send_string("pe"); break;
+            case NG_DOT : send_string("bo"); break;
+            case NG_SLSH: send_string("?" ); break;
+        }
+    } else if(nicola_o_key == NG_SHFTR) {
+        switch(nicola_m_key) {
+            case NG_Q   : send_string(""  ); break;
+            case NG_W   : send_string("ga"); break;
+            case NG_E   : send_string("da"); break;
+            case NG_R   : send_string("go"); break;
+            case NG_T   : send_string("za"); break;
+            case NG_Y   : send_string("yo"); break;
+            case NG_U   : send_string("ni"); break;
+            case NG_I   : send_string("ru"); break;
+            case NG_O   : send_string("ma"); break;
+            case NG_P   : send_string("le"); break;
+
+            case NG_A   : send_string("vu"); break;
+            case NG_S   : send_string("zi"); break;
+            case NG_D   : send_string("de"); break;
+            case NG_F   : send_string("ge"); break;
+            case NG_G   : send_string("ze"); break;
+            case NG_H   : send_string("mi"); break;
+            case NG_J   : send_string("o" ); break;
+            case NG_K   : send_string("no"); break;
+            case NG_L   : send_string("lyo");break;
+            case NG_SCLN: send_string("ltu");break;
+
+            case NG_Z   : send_string(""  ); break;
+            case NG_X   : send_string("bi"); break;
+            case NG_C   : send_string("zu"); break;
+            case NG_V   : send_string("bu"); break;
+            case NG_B   : send_string("be"); break;
+            case NG_N   : send_string("nu"); break;
+            case NG_M   : send_string("yu"); break;
+            case NG_COMM: send_string("mu"); break;
+            case NG_DOT : send_string("wa"); break;
+            case NG_SLSH: send_string("lo"); break;
+        }
+    }
+}
+
 // 親指シフトの入力処理
 bool process_nicola(uint16_t keycode, keyrecord_t *record) {
   // if (!is_nicola || n_modifier > 0) return true;
+  uint16_t curr_time = timer_read();
 
   if (record->event.pressed) {
-    switch (keycode) {
-      case NG_Q ... NG_SHFTR:
-        ninputs[ng_chrcount] = keycode; // キー入力をバッファに貯める
-        ng_chrcount++;
-        keycomb |= ng_key[keycode - NG_Q]; // キーの重ね合わせ
-        // 2文字押したら処理を開始
-        if (ng_chrcount > 1) {
-          nicola_type();
+    if(NG_Q <= keycode && keycode <= NG_SLSH) {
+        // M key
+        switch(nicola_int_state) {
+          case NICOLA_STATE_S1_INIT:
+            // no timeout check
+            nicola_int_state = NICOLA_STATE_S2_M;
+            break;
+          case NICOLA_STATE_S2_M:
+            // same behavior for time out and sequential stroke
+            nicola_m_type();
+            break;
+          case NICOLA_STATE_S3_O:
+            // timeout check
+            if(curr_time - nicola_o_time > TIMEOUT_THRESHOLD) {
+              // timeout => (output O) => S2
+              nicola_o_type();
+              nicola_int_state = NICOLA_STATE_S2_M;
+            } else {
+              // combo => S5
+              nicola_int_state = NICOLA_STATE_S5_OM;
+            }
+            break;
+          case NICOLA_STATE_S4_MO:
+            // timeout check
+            if(curr_time - nicola_o_time > TIMEOUT_THRESHOLD) {
+              // timeout => (output MO) => S2
+              nicola_om_type();
+              nicola_int_state = NICOLA_STATE_S2_M;
+            } else {
+              // combo => three key judge
+              uint16_t t1 = nicola_o_time - nicola_m_time;
+              uint16_t t2 = curr_time - nicola_o_time;
+              if(t1 < t2) {
+                // the O key in between is combo with the leading M key
+                nicola_om_type();
+                nicola_int_state = NICOLA_STATE_S2_M;
+              } else {
+                // the leading M key is single, the O key in between is combo with current key
+                nicola_m_type();
+                nicola_int_state = NICOLA_STATE_S5_OM;
+              }
+            }
+            break;
+          case NICOLA_STATE_S5_OM:
+            // same behavior for time out and sequential stroke
+            nicola_om_type();
+            nicola_int_state = NICOLA_STATE_S2_M;
+            break;
         }
+        nicola_m_key = keycode;
+        nicola_m_time = curr_time;
         return false;
-        break;
+    } else if(keycode == NG_SHFTL || keycode == NG_SHFTR) {
+        // O key
+        switch(nicola_int_state) {
+          case NICOLA_STATE_S1_INIT:
+            // no timeout check
+            nicola_int_state = NICOLA_STATE_S3_O;
+            break;
+          case NICOLA_STATE_S2_M:
+            // timeout check
+            if(curr_time - nicola_m_time > TIMEOUT_THRESHOLD) {
+              // timeout => (output M) => S3
+              nicola_m_type();
+              nicola_int_state = NICOLA_STATE_S3_O;
+            } else {
+              // combo => S4
+              nicola_int_state = NICOLA_STATE_S4_MO;
+            }
+            break;
+          case NICOLA_STATE_S3_O:
+            // same behavior for time out and sequential stroke
+            nicola_o_type();
+            break;
+          case NICOLA_STATE_S4_MO:
+            // same behavior for time out and sequential stroke
+            nicola_om_type();
+            nicola_int_state = NICOLA_STATE_S3_O;
+            break;
+          case NICOLA_STATE_S5_OM:
+            // timeout check
+            if(curr_time - nicola_m_time > TIMEOUT_THRESHOLD) {
+              // timeout => (output MO) => S3
+              nicola_om_type();
+              nicola_int_state = NICOLA_STATE_S3_O;
+            } else {
+              // combo => three key judge
+              uint16_t t1 = nicola_m_time - nicola_o_time;
+              uint16_t t2 = curr_time - nicola_m_time;
+              if(t1 < t2) {
+                // the M key in between is combo with the leading O key
+                nicola_om_type();
+                nicola_int_state = NICOLA_STATE_S3_O;
+              } else {
+                // the leading O key is single, the M key in between is combo with current key
+                nicola_o_type();
+                nicola_int_state = NICOLA_STATE_S4_MO;
+              }
+            }
+            break;
+        }
+        nicola_o_key = keycode;
+        nicola_o_time = curr_time;
+        return false;
+    } else {
+        // その他のキーが押された
+        switch(nicola_int_state) {
+          case NICOLA_STATE_S1_INIT:
+            break;
+          case NICOLA_STATE_S2_M:
+            nicola_m_type();
+            break;
+          case NICOLA_STATE_S3_O:
+            nicola_o_type();
+            break;
+          case NICOLA_STATE_S4_MO:
+            nicola_om_type();
+            break;
+          case NICOLA_STATE_S5_OM:
+            nicola_om_type();
+            break;
+        }
+        nicola_int_state = NICOLA_STATE_S1_INIT;
+        // continue processing current key, so this path returns true
     }
   } else { // key release
-    switch (keycode) {
-      case NG_Q ... NG_SHFTR:
-        // 2文字入力していなくても、どれかキーを離したら処理を開始する
-        if (ng_chrcount > 0) {
-          nicola_type();
+    if(NG_Q <= keycode && keycode <= NG_SHFTR) { // key off
+        switch(nicola_int_state) {
+          case NICOLA_STATE_S1_INIT:
+            break;
+          case NICOLA_STATE_S2_M:
+            if(nicola_m_key == keycode) {
+              nicola_m_type();
+              nicola_int_state = NICOLA_STATE_S1_INIT;
+            }
+            break;
+          case NICOLA_STATE_S3_O:
+            if(nicola_o_key == keycode) {
+              nicola_o_type();
+              nicola_int_state = NICOLA_STATE_S1_INIT;
+            }
+            break;
+          case NICOLA_STATE_S4_MO:
+            if(nicola_m_key == keycode) {
+              // M ON --> O ON --> M OFF
+              uint16_t t1 = nicola_o_time - nicola_m_time;
+              uint16_t t2 = curr_time - nicola_o_time;
+              if(t1>=t2 && t2 < OVERLAP_THRESHOLD) {
+                // M ON --> O ON --> M OFF (M is output, but O is still open to combo)
+                nicola_m_type();
+                nicola_int_state = NICOLA_STATE_S3_O;
+              } else {
+                // M ON --> O ON --> M OFF (both M and O are output)
+                nicola_om_type();
+                nicola_int_state = NICOLA_STATE_S1_INIT;
+              }
+            } else if(nicola_o_key == keycode) {
+              // M ON --> O ON --> O OFF (both M and O are output)
+              nicola_om_type();
+              nicola_int_state = NICOLA_STATE_S1_INIT;
+            }
+            break;
+          case NICOLA_STATE_S5_OM:
+            if(nicola_o_key == keycode) {
+              // O ON --> M ON --> O OFF
+              uint16_t t1 = nicola_m_time - nicola_o_time;
+              uint16_t t2 = curr_time - nicola_m_time;
+              if(t1>=t2 && t2 < OVERLAP_THRESHOLD) {
+                // O ON --> M ON --> O OFF (O is output, but M is still open to combo)
+                nicola_o_type();
+                nicola_int_state = NICOLA_STATE_S2_M;
+              } else {
+                // O ON --> M ON --> O OFF (both M and O are output)
+                nicola_om_type();
+                nicola_int_state = NICOLA_STATE_S1_INIT;
+              }
+            } else if(nicola_m_key == keycode) {
+              // O ON --> M ON --> M OFF (both O and M are output)
+              nicola_om_type();
+              nicola_int_state = NICOLA_STATE_S1_INIT;
+            }
+            break;
         }
-        keycomb &= ~ng_key[keycode - NG_Q]; // キーの重ね合わせ
         return false;
-        break;
     }
   }
   return true;
