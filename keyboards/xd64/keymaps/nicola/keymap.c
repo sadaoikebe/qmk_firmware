@@ -15,7 +15,7 @@
  */
 /*
  For XD64 VER3.0 split-spacebar
- modification by Sadao Ikebe
+ * (C) 2020 Sadao Ikebe @bonyarou
  */
 
 #include QMK_KEYBOARD_H
