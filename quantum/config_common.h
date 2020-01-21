@@ -285,6 +285,37 @@
 
 /* USART configuration */
 #ifdef BLUETOOTH_ENABLE
+#  ifdef MODULE_ADAFRUIT_UART_BLE
+#    if defined(__AVR_ATmega32U4__) || defined(__AVR_AT90USB1286__)
+       /* iom32u4.h has no definition of UCSR1D. copy from iom32u2.h */
+       #define UCSR1D _SFR_MEM8(0xCB)
+       #define RTSEN 0
+       #define CTSEN 1
+
+       #define SERIAL_UART_BAUD        76800
+       #define SERIAL_UART_DATA        UDR1
+       #define SERIAL_UART_UBRR        ((F_CPU/(8.0*SERIAL_UART_BAUD)-1+0.5))
+       #define SERIAL_UART_RXD_VECT    USART1_RX_vect
+       #define SERIAL_UART_TXD_READY   (UCSR1A&(1<<UDRE1))
+       #define SERIAL_UART_INIT()      do { \
+   		cli(); \
+           UBRR1L = (uint8_t) SERIAL_UART_UBRR;       /* baud rate */ \
+           UBRR1H = ((uint16_t)SERIAL_UART_UBRR>>8);  /* baud rate */ \
+           UCSR1B |= (1<<RXCIE1) | (1<<RXEN1); /* RX interrupt, RX: enable */ \
+           UCSR1B |= (0<<TXCIE1) | (1<<TXEN1); /* TX interrupt, TX: enable */ \
+           UCSR1C |= (0<<UPM11) | (0<<UPM10);  /* parity: none(00), even(01), odd(11) */ \
+           UCSR1A |= (1<<U2X1); /* 2x speed */ \
+           sei(); \
+       } while(0)
+#    else
+       #error "USART configuration is needed."
+#    endif
+     /* BT Power Control */
+     #define BT_POWERED    !(PORTD&(1<<PD5))
+     #define bt_power_init()    do { DDRD |= (1<<PD5); PORTD &= ~(1<<PD5);} while(0)
+     #define turn_off_bt()    do { PORTD |= (1<<PD5); } while(0)
+     #define turn_on_bt()    do { PORTD &= ~(1<<PD5); } while(0)
+#  else
 #    ifdef __AVR_ATmega32U4__
 #        define SERIAL_UART_BAUD 9600
 #        define SERIAL_UART_DATA UDR1
@@ -326,6 +357,7 @@
 #    else
 #        error "USART configuration is needed."
 #    endif
+#  endif
 #endif
 
 #define API_SYSEX_MAX_SIZE 32

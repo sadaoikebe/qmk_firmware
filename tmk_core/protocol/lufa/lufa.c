@@ -69,6 +69,9 @@ extern keymap_config_t keymap_config;
 #ifdef BLUETOOTH_ENABLE
 #    ifdef MODULE_ADAFRUIT_BLE
 #        include "adafruit_ble.h"
+#    elif MODULE_ADAFRUIT_UART_BLE
+#        include "ble51.h"
+#        include "ble51_task.h"
 #    else
 #        include "bluetooth.h"
 #    endif
@@ -564,6 +567,7 @@ static void send_keyboard(report_keyboard_t *report) {
     if (where == OUTPUT_BLUETOOTH || where == OUTPUT_USB_AND_BT) {
 #    ifdef MODULE_ADAFRUIT_BLE
         adafruit_ble_send_keys(report->mods, report->keys, sizeof(report->keys));
+#    elif MODULE_ADAFRUIT_UART_BLE
 #    elif MODULE_RN42
         bluefruit_serial_send(0xFD);
         bluefruit_serial_send(0x09);
@@ -629,6 +633,7 @@ static void send_mouse(report_mouse_t *report) {
 #        ifdef MODULE_ADAFRUIT_BLE
         // FIXME: mouse buttons
         adafruit_ble_send_mouse_move(report->x, report->y, report->v, report->h, report->buttons);
+#        elif MODULE_ADAFRUIT_UART_BLE
 #        else
         bluefruit_serial_send(0xFD);
         bluefruit_serial_send(0x00);
@@ -697,6 +702,7 @@ static void send_consumer(uint16_t data) {
     if (where == OUTPUT_BLUETOOTH || where == OUTPUT_USB_AND_BT) {
 #        ifdef MODULE_ADAFRUIT_BLE
         adafruit_ble_send_consumer_key(data, 0);
+#        elif MODULE_ADAFRUIT_UART_BLE
 #        elif MODULE_RN42
         static uint16_t last_data = 0;
         if (data == last_data) return;
@@ -936,6 +942,34 @@ static void setup_usb(void) {
     print_set_sendchar(sendchar);
 }
 
+#ifdef MODULE_ADAFRUIT_UART_BLE
+static void watchdog_on(void) {
+    wdt_disable();
+    wdt_enable(WDTO_500MS);
+}
+
+static void SetupHardware(void)
+{
+    /* Disable watchdog if enabled by bootloader/fuses */
+    //MCUSR &= ~(1 << WDRF);
+    //wdt_disable();
+
+    /* Disable clock division */
+    clock_prescale_set(clock_div_1);
+
+    // Leonardo needs. Without this USB device is not recognized.
+    USB_Disable();
+
+    USB_Init();
+
+#ifdef CONSOLE_ENABLE
+    // for Console_Task
+    USB_Device_EnableSOFEvents();
+    print_set_sendchar(sendchar_func);
+#endif
+}
+#endif
+
 /** \brief Main
  *
  * FIXME: Needs doc
@@ -944,6 +978,10 @@ int main(void) __attribute__((weak));
 int main(void) {
 #ifdef MIDI_ENABLE
     setup_midi();
+#endif
+
+#if defined(MODULE_ADAFRUIT_UART_BLE)
+    SetupHardware();
 #endif
 
     setup_mcu();
@@ -969,9 +1007,21 @@ int main(void) {
 #else
     USB_USBTask();
 #endif
+
+#if defined(MODULE_ADAFRUIT_UART_BLE)
+    ble51_init();
+    ble51_task_init();
+#endif
+
     /* init modules */
     keyboard_init();
+
+#if defined(MODULE_ADAFRUIT_UART_BLE)
+    host_set_driver(&ble51_driver);
+#else
     host_set_driver(&lufa_driver);
+#endif
+
 #ifdef SLEEP_LED_ENABLE
     sleep_led_init();
 #endif
@@ -992,7 +1042,28 @@ int main(void) {
         }
 #endif
 
+#ifdef MODULE_ADAFRUIT_UART_BLE
+        if (BLE51_PowerState > 1) {
+            //select_all_rows();
+            suspend_power_down();
+            if (suspend_wakeup_condition()) {
+                //unselect_rows();
+                watchdog_on();
+                suspend_wakeup_init();
+                if (BLE51_PowerState >= 4) {
+                    turn_on_bt();
+                }
+                BLE51_PowerState = 1;
+            }
+        }
+        if (BLE51_PowerState < 4){
+            wdt_reset();
+            if (BLE51_PowerState <= 1) keyboard_task();
+            ble51_task();
+        }
+#else
         keyboard_task();
+#endif
 
 #ifdef MIDI_ENABLE
         MIDI_Device_USBTask(&USB_MIDI_Interface);
