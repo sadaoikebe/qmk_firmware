@@ -126,55 +126,55 @@ void nicola_mode(uint16_t keycode, keyrecord_t *record) {
 
 void nicola_m_type(void) {
     switch(nicola_m_key) {
-        case NG_1   : send_string("1" ); break;
-        case NG_2   : send_string("2" ); break;
-        case NG_3   : send_string("3" ); break;
-        case NG_4   : send_string("4" ); break;
-        case NG_5   : send_string("5" ); break;
-        case NG_6   : send_string("6" ); break;
-        case NG_7   : send_string("7" ); break;
-        case NG_8   : send_string("8" ); break;
-        case NG_9   : send_string("9" ); break;
-        case NG_0   : send_string("0" ); break;
-        case NG_MINS: send_string("-" ); break;
-        case NG_EQL : send_string("=" ); break;
+        case NG_1   : send_string(SS_ALNUM(SS_TAP(X_1))); break;
+        case NG_2   : send_string(SS_ALNUM(SS_TAP(X_2))); break;
+        case NG_3   : send_string(SS_ALNUM(SS_TAP(X_3))); break;
+        case NG_4   : send_string(SS_ALNUM(SS_TAP(X_4))); break;
+        case NG_5   : send_string(SS_ALNUM(SS_TAP(X_5))); break;
+        case NG_6   : send_string(SS_ALNUM(SS_TAP(X_6))); break;
+        case NG_7   : send_string(SS_ALNUM(SS_TAP(X_7))); break;
+        case NG_8   : send_string(SS_ALNUM(SS_TAP(X_8))); break;
+        case NG_9   : send_string(SS_ALNUM(SS_TAP(X_9))); break;
+        case NG_0   : send_string(SS_ALNUM(SS_TAP(X_0))); break;
+        case NG_MINS: send_string(SS_ALNUM(SS_TAP(X_MINUS))); break;
+        case NG_EQL : send_string(SS_ALNUM(SS_TAP(X_EQUAL))); break;
 
-        case NG_Q   : send_string("." ); break;
-        case NG_W   : send_string("ka"); break;
-        case NG_E   : send_string("ta"); break;
-        case NG_R   : send_string("ko"); break;
-        case NG_T   : send_string("sa"); break;
-        case NG_Y   : send_string("ra"); break;
-        case NG_U   : send_string("ti"); break;
-        case NG_I   : send_string("ku"); break;
-        case NG_O   : send_string("tu"); break;
+        case NG_Q   : send_string(SS_LSFT(SS_TAP(X_DOT))); break; // 。
+        case NG_W   : send_string(SS_TAP(X_T)); break; // か
+        case NG_E   : send_string(SS_TAP(X_Q)); break; // た
+        case NG_R   : send_string(SS_TAP(X_B)); break; // こ
+        case NG_T   : send_string(SS_TAP(X_X)); break; // さ
+        case NG_Y   : send_string(SS_TAP(X_O)); break; // ら
+        case NG_U   : send_string(SS_TAP(X_A)); break; // ち
+        case NG_I   : send_string(SS_TAP(X_H)); break; // く
+        case NG_O   : send_string(SS_TAP(X_Z)); break; // つ
         case NG_P   : send_string(SS_ALNUM(SS_TAP(X_COMMA))); break; // ，
-        case NG_LBRC: send_string("," ); break;
-        case NG_RBRC: send_string(";" ); break;
-        case NG_BSLS: send_string(SS_TAP(X_BSLS)); break;
+        case NG_LBRC: send_string(SS_LSFT(SS_TAP(X_COMMA))); break; // 、
+        case NG_RBRC:                           break; //
+        case NG_BSLS: send_string(SS_ALNUM(SS_TAP(X_BSLASH))); break;
 
-        case NG_A   : send_string("u" ); break;
-        case NG_S   : send_string("si"); break;
-        case NG_D   : send_string("te"); break;
-        case NG_F   : send_string("ke"); break;
-        case NG_G   : send_string("se"); break;
-        case NG_H   : send_string("ha"); break;
-        case NG_J   : send_string("to"); break;
-        case NG_K   : send_string("ki"); break;
-        case NG_L   : send_string("i" ); break;
-        case NG_SCLN: send_string("nn"); break;
+        case NG_A   : send_string(SS_TAP(X_4)); break; // う
+        case NG_S   : send_string(SS_TAP(X_D)); break; // し
+        case NG_D   : send_string(SS_TAP(X_W)); break; // て
+        case NG_F   : send_string(SS_TAP(X_QUOTE)); break; // け
+        case NG_G   : send_string(SS_TAP(X_P)); break; // せ
+        case NG_H   : send_string(SS_TAP(X_F)); break; // は
+        case NG_J   : send_string(SS_TAP(X_S)); break; // と
+        case NG_K   : send_string(SS_TAP(X_G)); break; // き
+        case NG_L   : send_string(SS_TAP(X_E)); break; // い
+        case NG_SCLN: send_string(SS_TAP(X_Y)); break; // ん
         case NG_QUOT: send_string(SS_TAP(X_BSPACE)); break;
 
-        case NG_Z   : send_string(SS_ALNUM(SS_TAP(X_DOT))); break; // ，
-        case NG_X   : send_string("hi"); break;
-        case NG_C   : send_string("su"); break;
-        case NG_V   : send_string("hu"); break;
-        case NG_B   : send_string("he"); break;
-        case NG_N   : send_string("me"); break;
-        case NG_M   : send_string("so"); break;
-        case NG_COMM: send_string("ne"); break;
-        case NG_DOT : send_string("ho"); break;
-        case NG_SLSH: send_string("/" ); break;
+        case NG_Z   : send_string(SS_ALNUM(SS_TAP(X_DOT))); break; // ．
+        case NG_X   : send_string(SS_TAP(X_V)); break; // ひ
+        case NG_C   : send_string(SS_TAP(X_R)); break; // す
+        case NG_V   : send_string(SS_TAP(X_2)); break; // ふ
+        case NG_B   : send_string(SS_TAP(X_EQUAL)); break; // へ
+        case NG_N   : send_string(SS_TAP(X_SLASH)); break; // め
+        case NG_M   : send_string(SS_TAP(X_C)); break; // そ
+        case NG_COMM: send_string(SS_TAP(X_COMMA)); break; // ね
+        case NG_DOT : send_string(SS_TAP(X_MINUS)); break; // ほ
+        case NG_SLSH: send_string(SS_LSFT(SS_TAP(X_SLASH))); break; // ・
     }
 }
 
@@ -190,104 +190,104 @@ void nicola_om_type(void) {
             case NG_1   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_SLASH)))); break;
             case NG_2   : send_string(SS_ALNUM(SS_TAP(X_SLASH))); break;
             case NG_3   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_GRAVE)))); break;
-            case NG_4   : send_string("[" ); break;
-            case NG_5   : send_string("]" ); break;
-            case NG_6   : send_string(SS_ALNUM("[" )); break;
-            case NG_7   : send_string(SS_ALNUM("]" )); break;
-            case NG_8   : send_string("*" ); break;
-            case NG_9   : send_string("(" ); break;
-            case NG_0   : send_string(")" ); break;
-            case NG_MINS: send_string(SS_LSFT("-")); break;
-            case NG_EQL : send_string(SS_LSFT("=")); break;
+            case NG_4   : send_string(SS_LSFT(SS_TAP(X_LBRACKET))); break;
+            case NG_5   : send_string(SS_LSFT(SS_TAP(X_RBRACKET))); break;
+            case NG_6   : send_string(SS_ALNUM(SS_TAP(X_LBRACKET))); break;
+            case NG_7   : send_string(SS_ALNUM(SS_TAP(X_RBRACKET))); break;
+            case NG_8   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_8)))); break;
+            case NG_9   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_9)))); break;
+            case NG_0   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_0)))); break;
+            case NG_MINS: send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_MINUS)))); break;
+            case NG_EQL : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_EQUAL)))); break;
 
-            case NG_Q   : send_string("la"); break;
-            case NG_W   : send_string("e" ); break;
-            case NG_E   : send_string("ri"); break;
-            case NG_R   : send_string("lya");break;
-            case NG_T   : send_string("re"); break;
-            case NG_Y   : send_string("pa"); break;
-            case NG_U   : send_string("di"); break;
-            case NG_I   : send_string("gu"); break;
-            case NG_O   : send_string("du"); break;
-            case NG_P   : send_string("pi"); break;
-            case NG_LBRC: send_string("[" ); break;
-            case NG_RBRC: send_string("]" ); break;
-            case NG_BSLS: send_string(SS_ALNUM(SS_TAP(X_BSLS))); break;
+            case NG_Q   : send_string(SS_LSFT(SS_TAP(X_3))); break; // ぁ
+            case NG_W   : send_string(SS_TAP(X_5)); break; // え
+            case NG_E   : send_string(SS_TAP(X_L)); break; // り
+            case NG_R   : send_string(SS_LSFT(SS_TAP(X_7))); break; // ゃ
+            case NG_T   : send_string(SS_TAP(X_SCOLON)); break; // れ
+            case NG_Y   : send_string(SS_TAP(X_F) SS_TAP(X_RBRACKET)); break; // ぱ
+            case NG_U   : send_string(SS_TAP(X_A) SS_TAP(X_LBRACKET)); break; // ぢ
+            case NG_I   : send_string(SS_TAP(X_H) SS_TAP(X_LBRACKET)); break; // ぐ
+            case NG_O   : send_string(SS_TAP(X_Z) SS_TAP(X_LBRACKET)); break; // づ
+            case NG_P   : send_string(SS_TAP(X_V) SS_TAP(X_RBRACKET)); break; // ぴ
+            case NG_LBRC: send_string(SS_LSFT(SS_TAP(X_LBRACKET))); break; // 「
+            case NG_RBRC: send_string(SS_LSFT(SS_TAP(X_RBRACKET))); break; // 」
+            case NG_BSLS: send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_BSLASH)))); break;
 
-            case NG_A   : send_string("wo"); break;
-            case NG_S   : send_string("a" ); break;
-            case NG_D   : send_string("na"); break;
-            case NG_F   : send_string("lyu");break;
-            case NG_G   : send_string("mo"); break;
-            case NG_H   : send_string("ba"); break;
-            case NG_J   : send_string("do"); break;
-            case NG_K   : send_string("gi"); break;
-            case NG_L   : send_string("po"); break;
-            case NG_SCLN:                    break;
-            case NG_QUOT: send_string(SS_TAP(X_BSPACE)); break;
+            case NG_A   : send_string(SS_LSFT(SS_TAP(X_0))); break; // を
+            case NG_S   : send_string(SS_TAP(X_3)); break; // あ
+            case NG_D   : send_string(SS_TAP(X_U)); break; // な
+            case NG_F   : send_string(SS_LSFT(SS_TAP(X_8))); break; // ゅ
+            case NG_G   : send_string(SS_TAP(X_M)); break; // も
+            case NG_H   : send_string(SS_TAP(X_F) SS_TAP(X_LBRACKET)); break; // ば
+            case NG_J   : send_string(SS_TAP(X_S) SS_TAP(X_LBRACKET)); break; // ど
+            case NG_K   : send_string(SS_TAP(X_G) SS_TAP(X_LBRACKET)); break; // ぎ
+            case NG_L   : send_string(SS_TAP(X_MINUS) SS_TAP(X_RBRACKET)); break; // ぽ
+            case NG_SCLN:                    break; //
+            case NG_QUOT: send_string(SS_TAP(X_BSPACE)); break; // BS
 
-            case NG_Z   : send_string("lu"); break;
-            case NG_X   : send_string("-" ); break;
-            case NG_C   : send_string("ro"); break;
-            case NG_V   : send_string("ya"); break;
-            case NG_B   : send_string("li"); break;
-            case NG_N   : send_string("pu"); break;
-            case NG_M   : send_string("zo"); break;
-            case NG_COMM: send_string("pe"); break;
-            case NG_DOT : send_string("bo"); break;
-            case NG_SLSH: send_string("?" ); break;
+            case NG_Z   : send_string(SS_LSFT(SS_TAP(X_4))); break; // ぅ
+            case NG_X   : send_string(SS_TAP(X_JYEN)); break; // ー
+            case NG_C   : send_string(SS_TAP(X_GRAVE)); break; // ろ
+            case NG_V   : send_string(SS_TAP(X_7)); break; // や
+            case NG_B   : send_string(SS_LSFT(SS_TAP(X_E))); break; // ぃ
+            case NG_N   : send_string(SS_TAP(X_2) SS_TAP(X_RBRACKET)); break; // ぷ
+            case NG_M   : send_string(SS_TAP(X_C) SS_TAP(X_LBRACKET)); break; // ぞ
+            case NG_COMM: send_string(SS_TAP(X_EQUAL) SS_TAP(X_RBRACKET)); break; // ぺ
+            case NG_DOT : send_string(SS_TAP(X_MINUS) SS_TAP(X_LBRACKET)); break; // ぼ
+            case NG_SLSH: send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_SLASH)))); break; // ？
         }
     } else if(nicola_o_key == NG_SHFTR) {
         switch(nicola_m_key) {
             case NG_1   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_SLASH)))); break;
             case NG_2   : send_string(SS_ALNUM(SS_TAP(X_SLASH))); break;
             case NG_3   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_GRAVE)))); break;
-            case NG_4   : send_string("[" ); break;
-            case NG_5   : send_string("]" ); break;
-            case NG_6   : send_string(SS_ALNUM("[" )); break;
-            case NG_7   : send_string(SS_ALNUM("]" )); break;
-            case NG_8   : send_string("*" ); break;
-            case NG_9   : send_string("(" ); break;
-            case NG_0   : send_string(")" ); break;
-            case NG_MINS: send_string(SS_LSFT("-")); break;
-            case NG_EQL : send_string(SS_LSFT("=")); break;
+            case NG_4   : send_string(SS_LSFT(SS_TAP(X_LBRACKET))); break;
+            case NG_5   : send_string(SS_LSFT(SS_TAP(X_RBRACKET))); break;
+            case NG_6   : send_string(SS_ALNUM(SS_TAP(X_LBRACKET))); break;
+            case NG_7   : send_string(SS_ALNUM(SS_TAP(X_RBRACKET))); break;
+            case NG_8   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_8)))); break;
+            case NG_9   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_9)))); break;
+            case NG_0   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_0)))); break;
+            case NG_MINS: send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_MINUS)))); break;
+            case NG_EQL : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_EQUAL)))); break;
 
-            case NG_Q   :                    break;
-            case NG_W   : send_string("ga"); break;
-            case NG_E   : send_string("da"); break;
-            case NG_R   : send_string("go"); break;
-            case NG_T   : send_string("za"); break;
-            case NG_Y   : send_string("yo"); break;
-            case NG_U   : send_string("ni"); break;
-            case NG_I   : send_string("ru"); break;
-            case NG_O   : send_string("ma"); break;
-            case NG_P   : send_string("le"); break;
-            case NG_LBRC: send_string("_" ); break;
-            case NG_RBRC: send_string("*" ); break;
-            case NG_BSLS: send_string(SS_ALNUM(SS_TAP(X_BSLS))); break;
+            case NG_Q   : send_string(SS_TAP(X_RBRACKET)); break; // ゜
+            case NG_W   : send_string(SS_TAP(X_T) SS_TAP(X_LBRACKET)); break; // が
+            case NG_E   : send_string(SS_TAP(X_Q) SS_TAP(X_LBRACKET)); break; // だ
+            case NG_R   : send_string(SS_TAP(X_B) SS_TAP(X_LBRACKET)); break; // ご
+            case NG_T   : send_string(SS_TAP(X_X) SS_TAP(X_LBRACKET)); break; // ざ
+            case NG_Y   : send_string(SS_TAP(X_9)); break; // よ
+            case NG_U   : send_string(SS_TAP(X_I)); break; // に
+            case NG_I   : send_string(SS_TAP(X_DOT)); break; // る
+            case NG_O   : send_string(SS_TAP(X_J)); break; // ま
+            case NG_P   : send_string(SS_LSFT(SS_TAP(X_5))); break; // ぇ
+            case NG_LBRC: send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_RO)))); break; // ＿
+            case NG_RBRC: send_string(SS_ALNUM(SS_TAP(X_SCOLON))); break; // ；
 
-            case NG_A   : send_string("vu"); break;
-            case NG_S   : send_string("zi"); break;
-            case NG_D   : send_string("de"); break;
-            case NG_F   : send_string("ge"); break;
-            case NG_G   : send_string("ze"); break;
-            case NG_H   : send_string("mi"); break;
-            case NG_J   : send_string("o" ); break;
-            case NG_K   : send_string("no"); break;
-            case NG_L   : send_string("lyo");break;
-            case NG_SCLN: send_string("ltu");break;
-            case NG_QUOT: send_string("'" ); break;
+            case NG_A   : send_string(SS_TAP(X_4) SS_TAP(X_LBRACKET)); break; // ヴ
+            case NG_S   : send_string(SS_TAP(X_D) SS_TAP(X_LBRACKET)); break; // じ
+            case NG_D   : send_string(SS_TAP(X_W) SS_TAP(X_LBRACKET)); break; // で
+            case NG_F   : send_string(SS_TAP(X_QUOTE) SS_TAP(X_LBRACKET)); break; // げ
+            case NG_G   : send_string(SS_TAP(X_P) SS_TAP(X_LBRACKET)); break; // ぜ
+            case NG_H   : send_string(SS_TAP(X_N)); break; // み
+            case NG_J   : send_string(SS_TAP(X_6)); break; // お
+            case NG_K   : send_string(SS_TAP(X_K)); break; // の
+            case NG_L   : send_string(SS_LSFT(SS_TAP(X_9))); break; // ょ
+            case NG_SCLN: send_string(SS_LSFT(SS_TAP(X_Z))); break; // っ
+            case NG_QUOT: send_string(SS_ALNUM(SS_TAP(X_QUOT))); break; // ’
+            case NG_BSLS: send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_BSLASH)))); break;
 
-            case NG_Z   :                    break;
-            case NG_X   : send_string("bi"); break;
-            case NG_C   : send_string("zu"); break;
-            case NG_V   : send_string("bu"); break;
-            case NG_B   : send_string("be"); break;
-            case NG_N   : send_string("nu"); break;
-            case NG_M   : send_string("yu"); break;
-            case NG_COMM: send_string("mu"); break;
-            case NG_DOT : send_string("wa"); break;
-            case NG_SLSH: send_string("lo"); break;
+            case NG_Z   : send_string(SS_TAP(X_LBRACKET)); break; // ゛
+            case NG_X   : send_string(SS_TAP(X_V) SS_TAP(X_LBRACKET)); break; // び
+            case NG_C   : send_string(SS_TAP(X_R) SS_TAP(X_LBRACKET)); break; // ず
+            case NG_V   : send_string(SS_TAP(X_2) SS_TAP(X_LBRACKET)); break; //    ぶ
+            case NG_B   : send_string(SS_TAP(X_EQUAL) SS_TAP(X_LBRACKET)); break; // べ
+            case NG_N   : send_string(SS_TAP(X_1)); break; // ぬ
+            case NG_M   : send_string(SS_TAP(X_8)); break; // ゆ
+            case NG_COMM: send_string(SS_TAP(X_RO)); break; // む
+            case NG_DOT : send_string(SS_TAP(X_0)); break; // わ
+            case NG_SLSH: send_string(SS_LSFT(SS_TAP(X_6))); break; // ぉ
         }
     }
 }

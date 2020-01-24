@@ -41,7 +41,6 @@ typedef enum nicola_keycodes {
   NG_0,
   NG_MINS,
   NG_EQL,
-  NG_BSLS,
 
   NG_Q,
   NG_W,
@@ -55,6 +54,7 @@ typedef enum nicola_keycodes {
   NG_P,
   NG_LBRC,
   NG_RBRC,
+  NG_BSLS,
 
   NG_A,
   NG_S,
