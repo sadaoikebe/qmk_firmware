@@ -137,7 +137,7 @@ void nicola_m_type(void) {
         case NG_U   : send_string("ti"); break;
         case NG_I   : send_string("ku"); break;
         case NG_O   : send_string("tu"); break;
-        case NG_P   : send_string(SS_TAP(X_KP_COMMA)); break;
+        case NG_P   : send_string("," ); break;
         case NG_LBRC: send_string("," ); break;
         case NG_RBRC: send_string(":" ); break;
 
@@ -153,7 +153,7 @@ void nicola_m_type(void) {
         case NG_SCLN: send_string("nn"); break;
         case NG_QUOT: send_string(SS_TAP(X_BSPACE)); break;
 
-        case NG_Z   : send_string(SS_TAP(X_KP_DOT)); break;
+        case NG_Z   : send_string("." ); break;
         case NG_X   : send_string("hi"); break;
         case NG_C   : send_string("su"); break;
         case NG_V   : send_string("hu"); break;
