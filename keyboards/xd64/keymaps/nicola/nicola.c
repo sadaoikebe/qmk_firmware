@@ -139,7 +139,7 @@ void nicola_m_type(void) {
         case NG_O   : send_string("tu"); break;
         case NG_P   : send_string("," ); break;
         case NG_LBRC: send_string("," ); break;
-        case NG_RBRC: send_string(":" ); break;
+        case NG_RBRC: send_string(";" ); break;
 
         case NG_A   : send_string("u" ); break;
         case NG_S   : send_string("si"); break;
