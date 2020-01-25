@@ -227,7 +227,7 @@ void nicola_om_type(void) {
             case NG_QUOT: send_string(SS_TAP(X_BSPACE)); break; // BS
 
             case NG_Z   : send_string(SS_LSFT(SS_TAP(X_4))); break; // ぅ
-            case NG_X   : send_string(SS_TAP(X_JYEN)); break; // ー
+            case NG_X   : send_string(SS_LSFT(SS_TAP(X_MINUS))); break; // ー
             case NG_C   : send_string(SS_TAP(X_GRAVE)); break; // ろ
             case NG_V   : send_string(SS_TAP(X_7)); break; // や
             case NG_B   : send_string(SS_LSFT(SS_TAP(X_E))); break; // ぃ
@@ -285,7 +285,7 @@ void nicola_om_type(void) {
             case NG_B   : send_string(SS_TAP(X_EQUAL) SS_TAP(X_LBRACKET)); break; // べ
             case NG_N   : send_string(SS_TAP(X_1)); break; // ぬ
             case NG_M   : send_string(SS_TAP(X_8)); break; // ゆ
-            case NG_COMM: send_string(SS_TAP(X_RO)); break; // む
+            case NG_COMM: send_string(SS_TAP(X_JYEN)); break; // む
             case NG_DOT : send_string(SS_TAP(X_0)); break; // わ
             case NG_SLSH: send_string(SS_LSFT(SS_TAP(X_6))); break; // ぉ
         }
