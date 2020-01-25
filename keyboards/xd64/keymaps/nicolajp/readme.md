@@ -24,6 +24,7 @@ JIS Layout SW layer on ANSI Layout HW
 ![ANSI_106 Layout](ansi_106.png "ANSI_106 Layout")
 
 | VK | ANSI | JIS |
+|----|----|----|
 | OEM_MINUS | -, _ | -, = |
 | OEM_PLUS | =, + | ;, + |
 | OEM_4 | ［, ｛ | ［, ｛ |
@@ -34,6 +35,8 @@ JIS Layout SW layer on ANSI Layout HW
 | OEM_7 | ', " | ^, ~ |
 | OEM_2 | /, ? | /, ? |
 
+|KEY|CODE|
+|----|----|
 |無変換 |KC_MHEN KC_INT5 |
 |変換 |KC_HENK KC_INT4 |
 |カタカナ ひらがな ローマ字 |KC_KANA KC_INT2|
