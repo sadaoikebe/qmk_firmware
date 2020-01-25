@@ -44,4 +44,7 @@ JIS Layout SW layer on ANSI Layout HW
 |カタカナ ひらがな ローマ字 |KC_KANA KC_INT2|
 |半角 全角 漢字 |KC_ZKHK KC_GRAVE|
 
+## 情報元
+
 https://github.com/eswai/qmk_firmware/ を元にXD64に移植しました。
+https://bsakatu.net/doc/how-to-input-japanese-more-convinient-with-us-layout/ こちらの知見をもとに kbd106_ansi.dll を作成、ただし英数キーとかな「む」キーなど一部必要性に応じて変更。
