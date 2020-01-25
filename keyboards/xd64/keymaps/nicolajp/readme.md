@@ -15,13 +15,13 @@ kbd106_ansi.reg を import
 スキャンコードとVKコードの対応は以下の通り  
 
 ANSI Layout
-![ANSI Layout](ansi.png "ANSI Layout")
+![ANSI Layout](ansi_layout.svg "ANSI Layout")
 
 JIS Layout
-![JIS Layout](jis.png "JIS Layout")
+![JIS Layout](jis_layout.svg "JIS Layout")
 
 JIS Layout SW layer on ANSI Layout HW
-![ANSI_106 Layout](ansi_106.png "ANSI_106 Layout")
+![ANSI_106 Layout](ansi_106_layout.svg "ANSI_106 Layout")
 
 | VK | ANSI | JIS |
 |----|----|----|
@@ -29,11 +29,12 @@ JIS Layout SW layer on ANSI Layout HW
 | OEM_PLUS | =, + | ;, + |
 | OEM_4 | ［, ｛ | ［, ｛ |
 | OEM_6 | ］, ｝ | ］, ｝ |
-| OEM_5 | backslash, pipe | yen, pipe |
-| OEM_102 | backslash, pipe | backslash, _ |
+| OEM_5 | \\, \| | \\, \| |
+| OEM_102 | \\, \| | \\, _ |
 | OEM_1 | ;, : | :, * |
 | OEM_7 | ', " | ^, ~ |
 | OEM_2 | /, ? | /, ? |
+| OEM_3 | \`, ~ | \`, @ |
 
 |KEY|CODE|
 |----|----|
