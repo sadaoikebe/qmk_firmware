@@ -262,8 +262,8 @@ void nicola_om_type(void) {
             case NG_I   : send_string("ru"); break;
             case NG_O   : send_string("ma"); break;
             case NG_P   : send_string("le"); break;
-            case NG_LBRC: send_string("_" ); break;
-            case NG_RBRC: send_string("*" ); break;
+            case NG_LBRC: send_string("[" ); break;
+            case NG_RBRC: send_string("]" ); break;
             case NG_BSLS: send_string(SS_ALNUM(SS_TAP(X_BSLS))); break;
 
             case NG_A   : send_string("vu"); break;
