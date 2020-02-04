@@ -72,8 +72,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,  KC_NO,   KC_HOME,  KC_PGDN, KC_PGUP, KC_END,   KC_PSCR, KC_NO,   KC_BRK,  KC_NO,  \
       KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,  KC_NO,   KC_LEFT,  KC_DOWN, KC_UP,   KC_RIGHT, KC_INS,  KC_DEL,  KC_ENT,          \
       KC_LSFT, KC_NO,   KC_NO,   KC_NO,   KC_NO,  KC_NO,   KC_NO,    KC_NO,   KC_NO,   KC_NO,    KC_NO,   KC_NO,                    \
-      MO(_FUNC), KC_NO, LSFT(KC_SPC),                      KC_KANA2, KC_EISU,                    KC_MHEN, KC_TRNS, KC_TRNS, KC_TRNS )
-
+      MO(_FUNC), KC_NO, LSFT(KC_SPC),                      KC_KANA2, KC_EISU,                    LSFT(KC_SPC), KC_MHEN, KC_TRNS, KC_TRNS )
+        // Fn+Altに Shift + Space (Androidでの言語変更キー) をマップ
+        // モードずれ対策のため Fn + RWin に 無変換単独打鍵(just in case)
 };
 
 int RGB_current_mode;
@@ -107,6 +108,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KC_EISU:
       if (record->event.pressed) {
         // NICOLA親指シフト
+        // 無変換3回送出は Android 対応のため。
+        // Androidでは 無変換キーでひらがな → カタカナ → 半角カタカナと遷移する
+        // しかしこの機能は不要 & Windowsでの動作を変えたくないため無変換3回送出でやり過ごすことにする
         send_string(SS_TAP(X_MHEN) SS_TAP(X_MHEN) SS_TAP(X_MHEN));
         nicola_off();
         // NICOLA親指シフト
