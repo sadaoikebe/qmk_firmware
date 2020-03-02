@@ -1,8 +1,8 @@
-# XD64 VER3.0 ANSI split spacebar 用 親指シフトキーマップ (NICOLA配列)
+# Just60 ANSI split spacebar 用 親指シフトキーマップ (NICOLA配列)
 
 キーボード側で親指シフト出力するためのキーマップです。  
 一部の記号を入力するためJISキーボードとしてふるまいます。  
-キーボードライブラリを変更します。  
+kbd106_ansi.dllを使用します。  
 
 ## 配列
 ### 英数
