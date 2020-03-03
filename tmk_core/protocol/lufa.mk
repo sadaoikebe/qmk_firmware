@@ -33,6 +33,11 @@ ifeq ($(strip $(BLUETOOTH)), AdafruitBLE)
 		LUFA_SRC += $(LUFA_DIR)/adafruit_ble.cpp
 endif
 
+ifeq ($(strip $(BLUETOOTH)), AdafruitBLEUART)
+	LUFA_SRC += $(TMK_DIR)/protocol/serial_uart.c
+	LUFA_SRC += $(LUFA_DIR)/adafruit_ble_uart.c
+endif
+
 ifeq ($(strip $(BLUETOOTH)), AdafruitEZKey)
 	LUFA_SRC += $(LUFA_DIR)/bluetooth.c \
 	$(TMK_DIR)/protocol/serial_uart.c

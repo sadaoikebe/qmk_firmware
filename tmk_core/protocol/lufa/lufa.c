@@ -67,7 +67,10 @@ extern keymap_config_t keymap_config;
 #endif
 
 #ifdef BLUETOOTH_ENABLE
-#    ifdef MODULE_ADAFRUIT_BLE
+#    if defined(MODULE_ADAFRUIT_BLE_UART)
+#        include "../serial.h"
+#    endif
+#    if defined(MODULE_ADAFRUIT_BLE) || defined(MODULE_ADAFRUIT_BLE_UART)
 #        include "adafruit_ble.h"
 #    else
 #        include "bluetooth.h"
@@ -560,11 +563,15 @@ static void send_keyboard(report_keyboard_t *report) {
     uint8_t timeout = 255;
     uint8_t where   = where_to_send();
 
+    // XXXX
+    // where = OUTPUT_USB;
+    where = OUTPUT_USB_AND_BT;
+    // where = OUTPUT_BLUETOOTH;
 #ifdef BLUETOOTH_ENABLE
     if (where == OUTPUT_BLUETOOTH || where == OUTPUT_USB_AND_BT) {
-#    ifdef MODULE_ADAFRUIT_BLE
-        adafruit_ble_send_keys(report->mods, report->keys, sizeof(report->keys));
-#    elif MODULE_RN42
+#    if defined(MODULE_ADAFRUIT_BLE) || defined(MODULE_ADAFRUIT_BLE_UART)
+        adafruit_ble_send_keys(report);
+#    elif defined(MODULE_RN42)
         bluefruit_serial_send(0xFD);
         bluefruit_serial_send(0x09);
         bluefruit_serial_send(0x01);
@@ -628,7 +635,8 @@ static void send_mouse(report_mouse_t *report) {
     if (where == OUTPUT_BLUETOOTH || where == OUTPUT_USB_AND_BT) {
 #        ifdef MODULE_ADAFRUIT_BLE
         // FIXME: mouse buttons
-        adafruit_ble_send_mouse_move(report->x, report->y, report->v, report->h, report->buttons);
+        //adafruit_ble_send_mouse_move(report->x, report->y, report->v, report->h, report->buttons);
+        adafruit_ble_send_mouse_move(report);
 #        else
         bluefruit_serial_send(0xFD);
         bluefruit_serial_send(0x00);
@@ -952,8 +960,9 @@ int main(void) {
     setup_usb();
     sei();
 
-#if defined(MODULE_ADAFRUIT_EZKEY) || defined(MODULE_RN42)
+#if defined(MODULE_ADAFRUIT_EZKEY) || defined(MODULE_RN42) || defined(MODULE_ADAFRUIT_BLE_UART)
     serial_init();
+    print("Serial init finished.\n");
 #endif
 
     /* wait for USB startup & debug output */
@@ -991,6 +1000,8 @@ int main(void) {
                 USB_Device_SendRemoteWakeup();
             }
         }
+#else
+#error "nnn"
 #endif
 
         keyboard_task();
@@ -999,7 +1010,7 @@ int main(void) {
         MIDI_Device_USBTask(&USB_MIDI_Interface);
 #endif
 
-#ifdef MODULE_ADAFRUIT_BLE
+#if defined(MODULE_ADAFRUIT_BLE) || defined(MODULE_ADAFRUIT_BLE_UART)
         adafruit_ble_task();
 #endif
 

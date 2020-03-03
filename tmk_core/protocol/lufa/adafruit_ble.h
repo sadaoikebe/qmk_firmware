@@ -3,12 +3,13 @@
  * Supports the Adafruit BLE board built around the nRF51822 chip.
  */
 #pragma once
-#ifdef MODULE_ADAFRUIT_BLE
+#if defined(MODULE_ADAFRUIT_BLE) || defined(MODULE_ADAFRUIT_BLE_UART)
 #    include <stdbool.h>
 #    include <stdint.h>
 #    include <string.h>
 
 #    include "config_common.h"
+#    include "report.h"
 #    include "progmem.h"
 
 #    ifdef __cplusplus
@@ -34,7 +35,7 @@ extern void adafruit_ble_task(void);
  * this set of keys.
  * Also sends a key release indicator, so that the keys do not remain
  * held down. */
-extern bool adafruit_ble_send_keys(uint8_t hid_modifier_mask, uint8_t *keys, uint8_t nkeys);
+extern bool adafruit_ble_send_keys(report_keyboard_t *report);
 
 /* Send a consumer keycode, holding it down for the specified duration
  * (milliseconds) */
@@ -44,7 +45,7 @@ extern bool adafruit_ble_send_consumer_key(uint16_t keycode, int hold_duration);
 /* Send a mouse/wheel movement report.
  * The parameters are signed and indicate positive of negative direction
  * change. */
-extern bool adafruit_ble_send_mouse_move(int8_t x, int8_t y, int8_t scroll, int8_t pan, uint8_t buttons);
+extern bool adafruit_ble_send_mouse_move(report_keyboard_t *report);
 #    endif
 
 /* Compute battery voltage by reading an analog pin.

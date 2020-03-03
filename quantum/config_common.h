@@ -283,7 +283,7 @@
 #endif
 
 /* USART configuration */
-#ifdef BLUETOOTH_ENABLE
+#ifdef BLUETOOTH_ENABLE_XXXXX
 #    ifdef __AVR_ATmega32U4__
 #        define SERIAL_UART_BAUD 9600
 #        define SERIAL_UART_DATA UDR1
