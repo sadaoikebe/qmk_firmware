@@ -122,6 +122,12 @@ void nicola_mode(uint16_t keycode, keyrecord_t *record) {
 
 void nicola_m_type(void) {
     switch(nicola_m_key) {
+        case NG_1   : send_string("1" ); break;
+        case NG_2   : send_string("2" ); break;
+        case NG_3   : send_string("3" ); break;
+        case NG_4   : send_string("4" ); break;
+        case NG_5   : send_string("5" ); break;
+
         case NG_Q   : send_string("." ); break;
         case NG_W   : send_string("ka"); break;
         case NG_E   : send_string("ta"); break;
@@ -132,6 +138,8 @@ void nicola_m_type(void) {
         case NG_I   : send_string("ku"); break;
         case NG_O   : send_string("tu"); break;
         case NG_P   : send_string("," ); break;
+        case NG_LBRC: send_string("," ); break;
+        case NG_RBRC: send_string(";" ); break;
 
         case NG_A   : send_string("u" ); break;
         case NG_S   : send_string("si"); break;
@@ -143,6 +151,7 @@ void nicola_m_type(void) {
         case NG_K   : send_string("ki"); break;
         case NG_L   : send_string("i" ); break;
         case NG_SCLN: send_string("nn"); break;
+        case NG_QUOT: send_string(SS_TAP(X_BSPACE)); break;
 
         case NG_Z   : send_string("." ); break;
         case NG_X   : send_string("hi"); break;
@@ -166,6 +175,12 @@ void nicola_o_type(void) {
 void nicola_om_type(void) {
     if(nicola_o_key == NG_SHFTL) {
         switch(nicola_m_key) {
+            case NG_1   : send_string("?" ); break;
+            case NG_2   : send_string(SS_TAP(X_KP_SLASH)); break;
+            case NG_3   : send_string("~" ); break;
+            case NG_4   : send_string("[" ); break;
+            case NG_5   : send_string("]" ); break;
+
             case NG_Q   : send_string("la"); break;
             case NG_W   : send_string("e" ); break;
             case NG_E   : send_string("ri"); break;
@@ -176,6 +191,8 @@ void nicola_om_type(void) {
             case NG_I   : send_string("gu"); break;
             case NG_O   : send_string("du"); break;
             case NG_P   : send_string("pi"); break;
+            case NG_LBRC: send_string("[" ); break;
+            case NG_RBRC: send_string("]" ); break;
 
             case NG_A   : send_string("wo"); break;
             case NG_S   : send_string("a" ); break;
@@ -186,7 +203,8 @@ void nicola_om_type(void) {
             case NG_J   : send_string("do"); break;
             case NG_K   : send_string("gi"); break;
             case NG_L   : send_string("po"); break;
-            case NG_SCLN: send_string(""  ); break;
+            case NG_SCLN:                    break;
+            case NG_QUOT: send_string(SS_TAP(X_BSPACE)); break;
 
             case NG_Z   : send_string("lu"); break;
             case NG_X   : send_string("-" ); break;
@@ -201,7 +219,13 @@ void nicola_om_type(void) {
         }
     } else if(nicola_o_key == NG_SHFTR) {
         switch(nicola_m_key) {
-            case NG_Q   : send_string(""  ); break;
+            case NG_1   : send_string("?" ); break;
+            case NG_2   : send_string(SS_TAP(X_KP_SLASH)); break;
+            case NG_3   : send_string("~" ); break;
+            case NG_4   : send_string("[" ); break;
+            case NG_5   : send_string("]" ); break;
+
+            case NG_Q   :                    break;
             case NG_W   : send_string("ga"); break;
             case NG_E   : send_string("da"); break;
             case NG_R   : send_string("go"); break;
@@ -211,6 +235,8 @@ void nicola_om_type(void) {
             case NG_I   : send_string("ru"); break;
             case NG_O   : send_string("ma"); break;
             case NG_P   : send_string("le"); break;
+            case NG_LBRC: send_string("_" ); break;
+            case NG_RBRC: send_string("*" ); break;
 
             case NG_A   : send_string("vu"); break;
             case NG_S   : send_string("zi"); break;
@@ -222,8 +248,9 @@ void nicola_om_type(void) {
             case NG_K   : send_string("no"); break;
             case NG_L   : send_string("lyo");break;
             case NG_SCLN: send_string("ltu");break;
+            case NG_QUOT: send_string("'" ); break;
 
-            case NG_Z   : send_string(""  ); break;
+            case NG_Z   :                    break;
             case NG_X   : send_string("bi"); break;
             case NG_C   : send_string("zu"); break;
             case NG_V   : send_string("bu"); break;
@@ -245,7 +272,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
   uint16_t curr_time = timer_read();
 
   if (record->event.pressed) {
-    if(NG_Q <= keycode && keycode <= NG_SLSH) {
+    if(NG_M_TOP <= keycode && keycode <= NG_M_BOTTOM) {
         // M key
         switch(nicola_int_state) {
           case NICOLA_STATE_S1_INIT:
@@ -374,7 +401,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
         // continue processing current key, so this path returns true
     }
   } else { // key release
-    if(NG_Q <= keycode && keycode <= NG_SHFTR) { // key off
+    if(NG_TOP <= keycode && keycode <= NG_BOTTOM) { // key off
         switch(nicola_int_state) {
           case NICOLA_STATE_S1_INIT:
             break;
