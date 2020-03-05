@@ -1,4 +1,4 @@
-CONSOLE_ENABLE = yes         # Console for debug
+CONSOLE_ENABLE = no         # Console for debug
 
 # If you want to change the display of OLED, you need to change here
 SRC +=  nicola.c \

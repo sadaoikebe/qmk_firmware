@@ -3,7 +3,7 @@
 #include <string.h>
 #include "host.h"
 #include "host_driver.h"
-#include "serial.h"
+#include "../serial.h"
 #include "ble51.h"
 #include "debug.h"
 #include "timer.h"
