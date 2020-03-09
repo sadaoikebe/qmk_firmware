@@ -57,9 +57,7 @@ void keypress_timer_expired(void);
 // 親指シフトのレイヤー、シフトキーを設定
 void set_nicola(uint8_t layer) {
   nicola_layer = layer;
-#ifdef TIMEOUT_INTERRUPT
   keypress_timer_init(keypress_timer_expired);
-#endif
 }
 
 // 親指シフトをオンオフ

@@ -23,6 +23,7 @@
 static keypress_timer_expired_func_t callback;
 
 void keypress_timer_init(keypress_timer_expired_func_t _clbk) {
+#ifdef TIMEOUT_INTERRUPT
     cli();
     callback = _clbk;
 	TCCR1A = 0; // 0b00000000  - TOP is 0xFFFF
@@ -31,14 +32,17 @@ void keypress_timer_init(keypress_timer_expired_func_t _clbk) {
     TCNT1 = 0; // set timer counter initial value (16 bit value)
     OCR1A = 0xffff;
 	sei(); // enable interrupts
+#endif
 }
 
 void keypress_timer_start(uint16_t count) {
+#ifdef TIMEOUT_INTERRUPT
     cli();
 	TCNT1 = 0; // set timer counter initial value (16 bit value)
     OCR1A = count;
 	TIMSK1 = 2; // enable timer compare match 1A interrupt
 	sei(); // enable interrupts
+#endif
 }
 
 ISR(TIMER1_COMPA_vect) // 16 bit timer 1 compare 1A match
