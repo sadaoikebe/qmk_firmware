@@ -1,4 +1,5 @@
-/* Copyright 2019 Jianfei Wang
+/*
+ * (C) 2020 Sadao Ikebe @bonyarou
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
