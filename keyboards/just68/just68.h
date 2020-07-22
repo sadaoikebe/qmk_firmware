@@ -26,6 +26,9 @@
  *
  * The second converts the arguments into a two-dimensional array which
  * represents the switch matrix.
+ *
+ * The Just68 has electrically 6 rows 13 cols switch matrix, while it looks like 5 rows 15 cols layout.
+ * The keys at the right are actually wired to 6th row.
  */
 #define LAYOUT( \
       K00,   K01,   K02,   K03,   K04,   K05,   K06,   K07,   K08,   K09,   K0A,   K0B,   K0C,   K5A,  K58, \
