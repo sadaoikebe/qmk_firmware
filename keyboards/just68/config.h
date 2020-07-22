@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Jianfei Wang
+(C) 2020 Sadao Ikebe @bonyarou
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,48 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* USB Device descriptor parameter */
 #define VENDOR_ID 0xFEED
-#define PRODUCT_ID 0x1966
+#define PRODUCT_ID 0x1968
 #define DEVICE_VER 0x0001
 #define MANUFACTURER YDKB
-#define PRODUCT Just66
-#define DESCRIPTION Just66 Keyboard
+#define PRODUCT Just68
+#define DESCRIPTION Just68 Keyboard
 
 /* key matrix size */
 #define MATRIX_ROWS 6
 #define MATRIX_COLS 13
-
-/*
-B5 上
-B4 上から2番目
-B3 ????
-B2 MOSI 下から2番目
-B1 SCLK 最下段
-
-D7 Caps
-D6 A
-E2 2W
-C7 E
-D0 F
-B7 G
-F7 Y
-F6 U
-F5 I
-F4 O
-F1 P
-F0 [
-
-
-B0 no response
-B6 no response
-D1 no response
-D2
-D3 no response
-D5 no response
-D4 no response
-C6 no response
-
-
-*/
 
 #define MATRIX_ROW_PINS { B5, B4, B3, B2, B1, B0 }
 #define MATRIX_COL_PINS { D7, D6, E2, C7, D0, B7, F7, F6, F5, F4, F1, F0, E6 }

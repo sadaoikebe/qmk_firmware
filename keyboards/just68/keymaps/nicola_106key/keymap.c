@@ -1,4 +1,4 @@
-/* Copyright 2018-2019 eswai <@eswai>
+/* (C) 2020 Sadao Ikebe @bonyarou
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,10 +13,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*
- For XD64 VER3.0 split-spacebar
- * (C) 2020 Sadao Ikebe @bonyarou
- */
 
 #include QMK_KEYBOARD_H
 #include "bootloader.h"
@@ -24,7 +20,6 @@
 #include "nicola.h"
 NGKEYS nicola_keys;
 // NICOLA親指シフト
-#include <print.h>
 
 void update_led(void);
 
