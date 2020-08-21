@@ -1,24 +1,31 @@
-#pragma once
-
-#include "quantum.h"
-
-/* XD60 LEDs
- *   GPIO pads
- *   0 F7 not connected
- *   1 F6 RGB PWM Underglow
- *   2 F5 Backlight LED
- *   3 F4 not connected
- *   B2 Capslock LED
- *   B0 not connected
+/* Copyright 2018-2019 eswai <@eswai>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-inline void xd64_caps_led_on(void)    { DDRB |=  (1<<2); PORTB &= ~(1<<2); }
-inline void xd64_bl_led_on(void)      { DDRF |=  (1<<5); PORTF &= ~(1<<5); }
 
-inline void xd64_caps_led_off(void)   { DDRB &= ~(1<<2); PORTB &= ~(1<<2); }
-inline void xd64_bl_led_off(void)     { DDRF &= ~(1<<5); PORTF &= ~(1<<5); }
+/*
+ For XD64 VER3.0 split-spacebar
+ modification by Sadao Ikebe
+ */
 
-/* XD60 Keymap Definition Macro */
-#define LAYOUT( \
+#pragma once
+#include "config_common.h"
+
+#undef PRODUCT
+#define PRODUCT         XD60 3.0 NICOLA Oyayubi Shift
+
+#define LAYOUT_62_ansi_2space( \
       K00,  K01,  K02,  K03,  K04,  K05,  K06,  K07,  K08,  K09,  K0A,  K0B,  K0C,  K0D,       \
       K10,  K11,  K12,  K13,  K14,  K15,  K16,  K17,  K18,  K19,  K1A,  K1B,  K1C,  K1D,       \
       K20,  K21,  K22,  K23,  K24,  K25,  K26,  K27,  K28,  K29,  K2A,  K2B,        K2D,       \
