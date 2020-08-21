@@ -19,7 +19,7 @@
 |JU_0|0|KC_0|)|Shift + KC_9|
 |JU_MINS|-|KC_MINS|_|Shift + KC_INT1|
 |JU_EQL|=|*Shift +* KC_MINS|+|Shift + KC_SCLN|
-|JU_BSLS|\\|KC_INT1|\||Shift + KC_INT3|
+|JU_BSLS|\\ |KC_INT1|\||Shift + KC_INT3|
 |JU_SCLN|;|KC_SCLN|:|*KC_QUOT*|
 |JU_QUOT|'|*Shift +* KC_7|"| Shift + KC_2|
 |JU_GRV|\`|*Shift +* KC_LBRC|~|Shift + KC_EQL|
