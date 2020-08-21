@@ -137,7 +137,7 @@ void nicola_m_type(void) {
         case NG_9   : send_string("9" ); break;
         case NG_0   : send_string("0" ); break;
         case NG_MINS: send_string("-" ); break;
-        case NG_EQL : send_string("=" ); break;
+        case NG_EQL : send_string(SS_LSFT("-") ); break; // =
 
         case NG_Q   : send_string("." ); break;
         case NG_W   : send_string("ka"); break;
@@ -151,7 +151,7 @@ void nicola_m_type(void) {
         case NG_P   : send_string(SS_ALNUM(SS_TAP(X_COMMA))); break; // ，
         case NG_LBRC: send_string("," ); break;
         case NG_RBRC: send_string(";" ); break;
-        case NG_BSLS: send_string(SS_TAP(X_BSLS)); break;
+        case NG_BSLS: send_string(SS_ALNUM(SS_TAP(X_INT1))); break;
 
         case NG_A   : send_string("u" ); break;
         case NG_S   : send_string("si"); break;
@@ -189,16 +189,16 @@ void nicola_om_type(void) {
         switch(nicola_m_key) {
             case NG_1   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_SLASH)))); break;
             case NG_2   : send_string(SS_ALNUM(SS_TAP(X_SLASH))); break;
-            case NG_3   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_GRAVE)))); break;
-            case NG_4   : send_string("[" ); break;
-            case NG_5   : send_string("]" ); break;
-            case NG_6   : send_string(SS_ALNUM("[" )); break;
-            case NG_7   : send_string(SS_ALNUM("]" )); break;
-            case NG_8   : send_string("*" ); break;
-            case NG_9   : send_string("(" ); break;
-            case NG_0   : send_string(")" ); break;
-            case NG_MINS: send_string(SS_LSFT("-")); break;
-            case NG_EQL : send_string(SS_LSFT("=")); break;
+            case NG_3   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_EQUAL)))); break; // ~
+            case NG_4   : send_string("]" ); break; // [
+            case NG_5   : send_string(SS_TAP(X_NUHS)); break; // ]
+            case NG_6   : send_string(SS_LSFT("]" )); break; // {
+            case NG_7   : send_string(SS_LSFT(SS_TAP(X_NUHS))); break; // }
+            case NG_8   : send_string(SS_LSFT(SS_TAP(X_QUOT)) ); break; // *
+            case NG_9   : send_string("*" ); break; // (
+            case NG_0   : send_string("(" ); break; // )
+            case NG_MINS: send_string(SS_LSFT(SS_TAP(X_INT1))); break; // _
+            case NG_EQL : send_string(SS_LSFT(";")); break; // +
 
             case NG_Q   : send_string("la"); break;
             case NG_W   : send_string("e" ); break;
@@ -210,9 +210,9 @@ void nicola_om_type(void) {
             case NG_I   : send_string("gu"); break;
             case NG_O   : send_string("du"); break;
             case NG_P   : send_string("pi"); break;
-            case NG_LBRC: send_string("[" ); break;
-            case NG_RBRC: send_string("]" ); break;
-            case NG_BSLS: send_string(SS_ALNUM(SS_TAP(X_BSLS))); break;
+            case NG_LBRC: send_string("]" ); break;
+            case NG_RBRC: send_string(SS_TAP(X_NUHS)); break;
+            case NG_BSLS: send_string(SS_ALNUM(SS_TAP(X_INT1))); break;
 
             case NG_A   : send_string("wo"); break;
             case NG_S   : send_string("a" ); break;
@@ -241,16 +241,16 @@ void nicola_om_type(void) {
         switch(nicola_m_key) {
             case NG_1   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_SLASH)))); break;
             case NG_2   : send_string(SS_ALNUM(SS_TAP(X_SLASH))); break;
-            case NG_3   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_GRAVE)))); break;
-            case NG_4   : send_string("[" ); break;
-            case NG_5   : send_string("]" ); break;
-            case NG_6   : send_string(SS_ALNUM("[" )); break;
-            case NG_7   : send_string(SS_ALNUM("]" )); break;
-            case NG_8   : send_string("*" ); break;
-            case NG_9   : send_string("(" ); break;
-            case NG_0   : send_string(")" ); break;
-            case NG_MINS: send_string(SS_LSFT("-")); break;
-            case NG_EQL : send_string(SS_LSFT("=")); break;
+            case NG_3   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_EQUAL)))); break; // ~
+            case NG_4   : send_string("]" ); break; // [
+            case NG_5   : send_string(SS_TAP(X_NUHS)); break; // ]
+            case NG_6   : send_string(SS_LSFT("]" )); break; // {
+            case NG_7   : send_string(SS_LSFT(SS_TAP(X_NUHS))); break; // }
+            case NG_8   : send_string(SS_LSFT(SS_TAP(X_QUOT)) ); break; // *
+            case NG_9   : send_string("*" ); break; // (
+            case NG_0   : send_string("(" ); break; // )
+            case NG_MINS: send_string(SS_LSFT(SS_TAP(X_INT1))); break; // _
+            case NG_EQL : send_string(SS_LSFT(";")); break; // +
 
             case NG_Q   :                    break;
             case NG_W   : send_string("ga"); break;
@@ -264,7 +264,7 @@ void nicola_om_type(void) {
             case NG_P   : send_string("le"); break;
             case NG_LBRC: send_string("[" ); break;
             case NG_RBRC: send_string("]" ); break;
-            case NG_BSLS: send_string(SS_ALNUM(SS_TAP(X_BSLS))); break;
+            case NG_BSLS: send_string(SS_ALNUM(SS_TAP(X_INT1))); break;
 
             case NG_A   : send_string("vu"); break;
             case NG_S   : send_string("zi"); break;
