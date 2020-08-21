@@ -70,19 +70,20 @@ bool process_jtu(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case KC_LSHIFT:
       if (record->event.pressed) {
+        CLOSE_REG_SHIFT();
         lshift = true;
       } else {
+        CLOSE_UNREG_SHIFT();
         lshift = false;
-        lshift_to_reg = false;
       }
       break;
     case KC_RSHIFT:
       if (record->event.pressed) {
+        CLOSE_REG_SHIFT();
         rshift = true;
-        rshift_to_unreg = false;
       } else {
+        CLOSE_UNREG_SHIFT();
         rshift = false;
-        rshift_to_reg = false;
       }
       break;
     case JU_2:
