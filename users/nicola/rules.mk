@@ -1,6 +1,3 @@
-COMBO_ENABLE = no
-
-# If you want to change the display of OLED, you need to change here
 SRC +=  nicola.c \
 		jtu.c \
         key_duration.c

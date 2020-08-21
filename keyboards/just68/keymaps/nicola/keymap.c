@@ -21,17 +21,8 @@
 #include QMK_KEYBOARD_H
 #include "bootloader.h"
 
-// NICOLA親指シフト
-#include "nicola.h"
-NGKEYS nicola_keys;
-// NICOLA親指シフト
-#include "jtu.h"
-
-void update_led(void);
-
-extern keymap_config_t keymap_config;
-
-extern uint8_t is_master;
+#include "nicola.h" // NICOLA親指シフト
+#include "jtu.h"    // JIS keyboard on ANSI layout hardware
 
 // Each layer gets a name for readability, which is then used in the keymap matrix below.
 // The underscores don't mean anything - you can have a layer called STUFF or any other name.
@@ -76,29 +67,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       MO(_FUNC), KC_TRNS, KC_TRNS,                         KC_EISU,  KC_KANA2,         KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS )
 };
 
-int RGB_current_mode;
-
-void persistent_default_layer_set(uint16_t default_layer) {
-  eeconfig_update_default_layer(default_layer);
-  default_layer_set(default_layer);
-}
-
-// Setting ADJUST layer RGB back to default
-void update_tri_layer_RGB(uint8_t layer1, uint8_t layer2, uint8_t layer3) {
-  if (IS_LAYER_ON(layer1) && IS_LAYER_ON(layer2)) {
-    layer_on(layer3);
-  } else {
-    layer_off(layer3);
-  }
-}
-
 void matrix_init_user(void) {
   // NICOLA親指シフト
   set_nicola(_NICOLA);
   // NICOLA親指シフト
-}
-
-void update_led() {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -111,7 +83,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         send_string(SS_TAP(X_LANG2)); // Mac
         nicola_off();
         // NICOLA親指シフト
-        update_led();
       }
       return false;
       break;
@@ -122,7 +93,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         send_string(SS_TAP(X_LANG1)); // Mac
         nicola_on();
         // NICOLA親指シフト
-        update_led();
       }
       return false;
       break;
@@ -133,7 +103,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   if (nicola_state()) {
     nicola_mode(keycode, record);
     a = process_nicola(keycode, record);
-    update_led();
   }
   if (a == false) return false;
   // NICOLA親指シフト

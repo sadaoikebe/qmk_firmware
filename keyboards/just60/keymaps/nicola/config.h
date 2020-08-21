@@ -23,4 +23,4 @@
 #include "config_common.h"
 
 #undef PRODUCT
-#define PRODUCT         XD64 3.0 NICOLA JP Oyayubi Shift
+#define PRODUCT         Just60 NICOLA Oyayubi Shift
