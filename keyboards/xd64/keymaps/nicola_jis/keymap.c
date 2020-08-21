@@ -53,7 +53,7 @@ enum custom_keycodes {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_QWERTY] = LAYOUT_64_ansi_split_noarrow( \
       KC_ESC,  KC_1,    JU_2,    KC_3,    KC_4,   KC_5,   JU_6,    JU_7,   JU_8,    JU_9,    JU_0,    JU_MINS,  JU_EQL,  KC_BSPC, \
-      KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,   KC_T,   KC_Y,    KC_U,   KC_I,    KC_O,    KC_P,    KC_RBRC,  KC_NUHS, JU_BSLS, \
+      KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,   KC_T,   KC_Y,    KC_U,   KC_I,    KC_O,    KC_P,    JU_LBRC,  JU_RBRC, JU_BSLS, \
       KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,   KC_G,   KC_H,    KC_J,   KC_K,    KC_L,    JU_SCLN, JU_QUOT,  KC_ENT,           \
       KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,   KC_B,   KC_N,    KC_M,   KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,                    \
       MO(_FUNC),   KC_LGUI, KC_LALT,                      KC_SPC,  KC_SPC,                   KC_RALT, KC_RGUI, LT(_FUNC, KC_APP), KC_RCTL ),

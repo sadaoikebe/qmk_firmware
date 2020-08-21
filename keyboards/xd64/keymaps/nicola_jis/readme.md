@@ -1,84 +1,46 @@
-# XD64 VER3.0 ANSI split spacebar 用 親指シフトキーマップ (NICOLA配列)
+# XD64 VER3.0 分割スペースバー 用 親指シフトキーマップ (NICOLA配列)
 
 キーボード側で親指シフト出力するためのキーマップです。  
-一部の記号を入力するためJISキーボードとしてふるまいます。  
-
+物理的なキー配置はANSI配列ですが、JISキーボードのキーコードを送信します。
 
 ## 配列
-### 英数
- 1  2  3  4  5    6  7  8  9  0  -  =  BS  
-&nbsp;  q  w  e  r  t    y  u  i  o  p  [  ]  \  
-&nbsp;&nbsp;   a  s  d  f  g    h  j  k  l  ;  ' ENTER  
-&nbsp;&nbsp;&nbsp;    z  x  c  v  b    n  m  ,  .  /  
-### そのまま押した場合
- １ ２ ３ ４ ５   ６ ７ ８ ９ ０ ー ＝ BS  
-&nbsp;  。 か た こ さ   ら ち く つ ， 、 ； ￥  
-&nbsp;&nbsp;   う し て け せ   は と き い ん BS ENTER  
-&nbsp;&nbsp;&nbsp;    ． ひ す ふ へ   め そ ね ほ ・  
-## 親指シフト時  ※ 8 9 0 は ANSI配列の括弧に合わせている
- ？ ／ ～ 「 」   ［ ］ ＊ （ ） ＿ ＋  
-&nbsp;  ぁ え り ゃ れ   よ に る ま ぇ 「 」 ￥  
-&nbsp;&nbsp;   を あ な ゅ も   み お の ょ っ ’  
-&nbsp;&nbsp;&nbsp;    ぅ ー ろ や ぃ   ぬ ゆ む わ ぉ  
-## クロスシフト時
- ？ ／ ～ 「 」   ［ ］ ＊ （ ） ＿ ＋   
-&nbsp;   が だ ご ざ   ぱ ぢ ぐ づ ぴ   「 」 ￥  
-&nbsp;&nbsp;   ヴ じ で げ ぜ   ば ど ぎ ぽ .. BS  
-&nbsp;&nbsp;&nbsp;    .. び ず ぶ べ   ぷ ぞ ぺ ぼ ゛  
-## 小指シフト
- ！ ＠ ＃ ＄ ％   ＾ ＆ ＊ （ ） ＿ ＋   
-&nbsp;  Ｑ Ｗ Ｅ Ｒ Ｔ   Ｙ Ｕ Ｉ Ｏ Ｐ ｛ ｝ ｜  
-&nbsp;&nbsp;   Ａ Ｓ Ｄ Ｆ Ｇ   Ｈ Ｊ Ｋ Ｌ ： BS  
-&nbsp;&nbsp;&nbsp;    Ｚ Ｘ Ｃ Ｖ Ｂ   Ｎ Ｍ ＜ ＞ ？  
+![Layout](layout.png "Layout")
 
-## スキャンコードとVKコードの対応
+## 物理配列 = ANSI配列 を JIS配列に置き換える
 
-#### Shiftを外すもの
-|KEY|ANSI Key|VK|JIS Keytop|
+|ANSI物理キー|NoShift出力|VK (JIS)|Shift出力|VK (JIS)|
+|---|---|---|---|---|
+|JU_2|2|KC_2|@|*KC_LBRC*|
+|JU_6|6|KC_6|^|*KC_EQL*|
+|JU_7|7|KC_7|&|Shift + KC_6|
+|JU_8|8|KC_8|*|Shift + KC_QUOT|
+|JU_9|9|KC_9|(|Shift + KC_8|
+|JU_0|0|KC_0|)|Shift + KC_9|
+|JU_MINS|-|KC_MINS|_|Shift + KC_INT1|
+|JU_EQL|=|*Shift +* KC_MINS|+|Shift + KC_SCLN|
+|JU_BSLS|\\|KC_INT1|\||Shift + KC_INT3|
+|JU_SCLN|;|KC_SCLN|:|*KC_QUOT*|
+|JU_QUOT|'|*Shift +* KC_7|"| Shift + KC_2|
+|JU_GRV|\`|*Shift +* KC_LBRC|~|Shift + KC_EQL|
+斜体表記はシフト状態の変化
+
+|JIS論理キー|VK Code|NoShift入力|Shift入力|
 |---|---|---|---|
-|SHIFT + JU_2|@|KC_LBRC| @, \` |
-|SHIFT + JU_6|^|KC_EQL| ^, ~ |
-|SHIFT + JU_SCLN|:| KC_QUOT | :, * |
-
-#### Shiftを足すもの
-|KEY|ANSI Key|VK|JIS Keytop|
-|---|---|---|---|
-|JU_EQL|+|SHIFT + KC_MINS| -, = |
-|JU_QUOT|'|SHIFT + KC_7| 7, ' |
-|JU_GRV|\`|SHIFT + KC_LBRC| @, \` |
-
-#### Keycode置換 (No Shift)
-|KEY|ANSI Key|VK|JIS Keytop|
-|---|---|---|---|
-|JU_BSLS|\\|KC_INT1| \\, _ |
-|SHIFT + JU_BSLS|\| | SHIFT + KC_INT3 | \\, \| |
-
-#### Keycode置換 (Shift)
-|KEY|ANSI Key|VK|JIS Keytop|
-|---|---|---|---|
-|SHIFT + JU_7|&|SHIFT + KC_6| 6, & |
-|SHIFT + JU_8|*|SHIFT + KC_QUOT| :, * |
-|SHIFT + JU_9|(|SHIFT + KC_8| 8, ( |
-|SHIFT + JU_0|)|SHIFT + KC_9| 9, ) |
-|SHIFT + JU_MINS|_|SHIFT + KC_INT1| ロ, _ |
-|SHIFT + JU_EQL|+|SHIFT + KC_SCLN| ;, + |
-|SHIFT + JU_QUOT|"|SHIFT + KC_2| 2, " |
-|SHIFT + JU_GRV|~|SHIFT + KC_EQL| ^, ~ |
-
-#### Keyごと置換
-|KEY|ANSI Key|VK|JIS Keytop|
-|---|---|---|---|
-|JU_LBRC|[, {|KC_RBRC| [, { |
-|JU_RBRC|[, }|KC_NUHS| ], } |
-
-|KEY|CODE|
-|----|----|
-|無変換 |KC_MHEN KC_INT5 |
-|変換 |KC_HENK KC_INT4 |
-|カタカナ ひらがな ローマ字 |KC_KANA KC_INT2|
-|半角 全角 漢字 |KC_ZKHK KC_GRAVE|
+| 2, " |KC_2|JU_2|Shift + JU_QUOT|
+| 6, & |KC_6|JU_6|Shift + JU_7|
+| 7, ' |KC_7|JU_7|*JU_QUOT*|
+| 8, ( |KC_8|JU_8|Shift + JU_9|
+| 9, ) |KC_9|JU_9|Shift + JU_0|
+| 0  |KC_0|JU_0|(N/A)|
+| -, = |KC_MINS|JU_MINS|Shift + JU_EQL|
+| ^, ~ |KC_EQL|*Shift +* JU_6|Shift + JU_GRV|
+| \\, \| |KC_INT3|(N/A)|Shift + JU_BSLS|
+| @, \` |KC_LBRC|*Shift +* JU_2|*JU_GRV*|
+| ;, + |KC_SCLN|JU_SCLN|Shift + JU_EQL|
+| :, * |KC_QUOT|*Shift +* JU_SCLN|Shift + JU_8|
+| \\, _ |KC_INT1|JU_BSLS|Shift + JU_MINS|
 
 ## 情報元
 
-https://github.com/eswai/qmk_firmware/ を元にXD64に移植しました。
-[jtu_custom_keycodes](https://github.com/koktoh/jtu_custom_keycodes/tree/master/default) を参考にして layer DLL 不要としました。
+* https://github.com/eswai/qmk_firmware/ を元にNICOLA規格のタイミング判定を追加しました。
+* [jtu_custom_keycodes](https://github.com/koktoh/jtu_custom_keycodes/tree/master/default) を元にRepeat判定を追加しました。
