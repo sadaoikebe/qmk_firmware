@@ -55,6 +55,7 @@ enum jtu_ansi_key {
     JU_A_0,
     JU_A_MINS,
     JU_A_EQL,
+    JU_A_BSLS,
     JU_A_SCLN,
     JU_A_QUOT,
     JU_A_GRV,
@@ -268,22 +269,22 @@ bool process_jtu(uint16_t keycode, keyrecord_t *record) {
     case JU_BSLS:
       if (record->event.pressed) {
         if (lshift || rshift) {
-          jtu_a_pressed_shift[JU_A_SCLN] = true;
+          jtu_a_pressed_shift[JU_A_BSLS] = true;
           CLOSE_UNREG_SHIFT();
           JTU_PRESS(INT3);
         } else {
-          jtu_a_pressed_nshift[JU_A_SCLN] = true;
+          jtu_a_pressed_nshift[JU_A_BSLS] = true;
           CLOSE_REG_SHIFT();
-          JTU_PRESS(INT1);
+          JTU_PRESS(INT3);
         }
       } else {
-          if(jtu_a_pressed_shift[JU_A_SCLN]) {
-            jtu_a_pressed_shift[JU_A_SCLN] = false;
+          if(jtu_a_pressed_shift[JU_A_BSLS]) {
+            jtu_a_pressed_shift[JU_A_BSLS] = false;
             JTU_RELEASE(INT3);
           }
-          if(jtu_a_pressed_nshift[JU_A_SCLN]) {
-            jtu_a_pressed_nshift[JU_A_SCLN] = false;
-            JTU_RELEASE(INT1);
+          if(jtu_a_pressed_nshift[JU_A_BSLS]) {
+            jtu_a_pressed_nshift[JU_A_BSLS] = false;
+            JTU_RELEASE(INT3);
           }
       }
       return false;
