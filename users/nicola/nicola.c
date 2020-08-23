@@ -200,10 +200,10 @@ void nicola_om_type(void) {
             case NG_MINS: send_string(SS_LSFT(SS_TAP(X_INT1))); break; // _
             case NG_EQL : send_string(SS_LSFT(";")); break; // +
 
-            case NG_Q   : send_string("la"); break;
+            case NG_Q   : send_string("xa"); break;
             case NG_W   : send_string("e" ); break;
             case NG_E   : send_string("ri"); break;
-            case NG_R   : send_string("lya");break;
+            case NG_R   : send_string("xya");break;
             case NG_T   : send_string("re"); break;
             case NG_Y   : send_string("pa"); break;
             case NG_U   : send_string("di"); break;
@@ -217,7 +217,7 @@ void nicola_om_type(void) {
             case NG_A   : send_string("wo"); break;
             case NG_S   : send_string("a" ); break;
             case NG_D   : send_string("na"); break;
-            case NG_F   : send_string("lyu");break;
+            case NG_F   : send_string("xyu");break;
             case NG_G   : send_string("mo"); break;
             case NG_H   : send_string("ba"); break;
             case NG_J   : send_string("do"); break;
@@ -226,11 +226,11 @@ void nicola_om_type(void) {
             case NG_SCLN:                    break;
             case NG_QUOT: send_string(SS_TAP(X_BSPACE)); break;
 
-            case NG_Z   : send_string("lu"); break;
+            case NG_Z   : send_string("xu"); break;
             case NG_X   : send_string("-" ); break;
             case NG_C   : send_string("ro"); break;
             case NG_V   : send_string("ya"); break;
-            case NG_B   : send_string("li"); break;
+            case NG_B   : send_string("xi"); break;
             case NG_N   : send_string("pu"); break;
             case NG_M   : send_string("zo"); break;
             case NG_COMM: send_string("pe"); break;
@@ -261,7 +261,7 @@ void nicola_om_type(void) {
             case NG_U   : send_string("ni"); break;
             case NG_I   : send_string("ru"); break;
             case NG_O   : send_string("ma"); break;
-            case NG_P   : send_string("le"); break;
+            case NG_P   : send_string("xe"); break;
             case NG_LBRC: send_string("[" ); break;
             case NG_RBRC: send_string("]" ); break;
             case NG_BSLS: send_string(SS_ALNUM(SS_TAP(X_INT1))); break;
@@ -274,8 +274,8 @@ void nicola_om_type(void) {
             case NG_H   : send_string("mi"); break;
             case NG_J   : send_string("o" ); break;
             case NG_K   : send_string("no"); break;
-            case NG_L   : send_string("lyo");break;
-            case NG_SCLN: send_string("ltu");break;
+            case NG_L   : send_string("xyo");break;
+            case NG_SCLN: send_string("xtu");break;
             case NG_QUOT: send_string("'" ); break;
 
             case NG_Z   :                    break;
@@ -287,7 +287,7 @@ void nicola_om_type(void) {
             case NG_M   : send_string("yu"); break;
             case NG_COMM: send_string("mu"); break;
             case NG_DOT : send_string("wa"); break;
-            case NG_SLSH: send_string("lo"); break;
+            case NG_SLSH: send_string("xo"); break;
         }
     }
 }

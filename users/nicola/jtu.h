@@ -8,6 +8,7 @@
 
 #define JU_LBRC KC_RBRACKET
 #define JU_RBRC KC_NONUS_HASH
+#define JU_BSLS KC_INT3
 
 enum jtu_keycodes {
   JU_2 = NG_SAFE_RANGE,
@@ -18,7 +19,6 @@ enum jtu_keycodes {
   JU_0,
   JU_MINS,
   JU_EQL,
-  JU_BSLS,
   JU_SCLN,
   JU_QUOT,
   JU_GRV,
