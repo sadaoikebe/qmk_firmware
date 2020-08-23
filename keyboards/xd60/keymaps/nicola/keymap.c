@@ -73,6 +73,15 @@ void matrix_init_user(void) {
   // NICOLA親指シフト
 }
 
+// Initialize the 13th LED
+void keyboard_post_init_user(void) {
+    for(int i=0; i<RGBLED_NUM; ++i) {
+        rgblight_setrgb_at(0, 0, 0, i);
+    }
+    rgblight_sethsv_at(170,255,40, RGBLED_NUM-1); // the last LED = BLUE (NICOLA off)
+    nicola_off();
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
   switch (keycode) {
@@ -83,6 +92,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         send_string(SS_TAP(X_LANG2)); // Mac
         nicola_off();
         // NICOLA親指シフト
+        rgblight_sethsv_at(170,255,40, RGBLED_NUM-1); // the last LED = BLUE (NICOLA off)
       }
       return false;
       break;
@@ -93,6 +103,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         send_string(SS_TAP(X_LANG1)); // Mac
         nicola_on();
         // NICOLA親指シフト
+        rgblight_sethsv_at(85,255,40, RGBLED_NUM-1); // the last LED = GREEN (NICOLA on)
       }
       return false;
       break;

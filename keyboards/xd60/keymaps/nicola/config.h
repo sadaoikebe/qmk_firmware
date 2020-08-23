@@ -38,3 +38,8 @@
     { K30, KC_NO, K32, K33,   K34,   K35,  K36,   K37,   K38,   K39,   K3A, K3B, KC_NO, K3D },  \
     { K40, K41,   K42, KC_NO, KC_NO, K45,  K46,   KC_NO, KC_NO, KC_NO, K4A, K4B, K4C,   K4D }   \
 }
+
+// Change LED settings in order to make 13th LED NICOLA-mode indicator
+#undef RGBLED_NUM
+#undef RGBLIGHT_ANIMATIONS
+#define RGBLED_NUM 13
