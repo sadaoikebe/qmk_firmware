@@ -22,3 +22,6 @@
 [submodule "lib/printf"]
 	path = lib/printf
 	url = https://github.com/qmk/printf
+[submodule "lib/arm_atsam_asf/microchip-asf"]
+	path = lib/arm_atsam_asf/microchip-asf
+	url = https://github.com/alfred-ai/microchip-asf.git
