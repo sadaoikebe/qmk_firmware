@@ -118,3 +118,13 @@ ifeq ($(strip $(BOOTLOADER)), stm32duino)
     DFU_ARGS = -d 1EAF:0003 -a2 -R
     DFU_SUFFIX_ARGS = -v 1EAF -p 0003
 endif
+
+ifeq ($(strip $(BOOTLOADER)), atsam-dfu-1k)
+    BOOTLOADER_SIZE = 0x400
+endif
+ifeq ($(strip $(BOOTLOADER)), atsam-dfu-2k)
+    BOOTLOADER_SIZE = 0x800
+endif
+ifeq ($(strip $(BOOTLOADER)), atsam-dfu-4k)
+    BOOTLOADER_SIZE = 0x1000
+endif

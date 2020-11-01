@@ -52,8 +52,8 @@ LDFLAGS += -Wl,--gc-sections
 LDFLAGS += -Wl,-Map="%OUT%%PROJ_NAME%.map"
 LDFLAGS += -Wl,--start-group
 LDFLAGS += -Wl,--end-group
-ifneq ($(ARM_ATSAM_ASF_START_ADDR), "")
-LDFLAGS += -Wl,--section-start=.text=$(ARM_ATSAM_ASF_START_ADDR)
+ifneq ($(BOOTLOADER_SIZE), "")
+LDFLAGS += -Wl,--section-start=.text=$(BOOTLOADER_SIZE)
 endif
 LDFLAGS += --specs=nano.specs
 LDFLAGS += -T$(SDK)/sam0/utils/linker_scripts/$(SAMD)/gcc/$(LD_FILE)
@@ -74,5 +74,9 @@ bin: $(BUILD_DIR)/$(TARGET).hex
 	$(OBJCOPY) -Iihex -Obinary $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 	$(COPY) $(BUILD_DIR)/$(TARGET).bin $(TARGET).bin;
 
-flash: bin
-	$(PRINT_OK); $(SILENT) || printf "$(MSG_FLASH_ARCH)"
+flash: dfu
+
+DFU_PROGRAMMER ?= dfu-util
+
+dfu: bin
+	$(DFU_PROGRAMMER) --download $(TARGET).bin --reset
