@@ -44,8 +44,8 @@
  * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
  */
 
-#ifndef _UDC_HID_KBD_H_
-#define _UDC_HID_KBD_H_
+#ifndef _UDC_HID_KBD_API_H_
+#define _UDC_HID_KBD_API_H_
 
 #include "udc_desc.h"
 #include "udi.h"
@@ -54,9 +54,20 @@
 extern "C" {
 #endif
 
+#define UDI_HID_KBD_ENABLE_EXT() arm_atsam_asf_udi_hid_callback_keyboard_enable()
+#define UDI_HID_KBD_DISABLE_EXT() arm_atsam_asf_udi_hid_callback_keyboard_disable()
+#define UDI_HID_KBD_CHANGE_LED(value) arm_atsam_asf_udi_hid_callback_keyboard_led(value)
+
+extern bool arm_atsam_asf_udi_hid_callback_keyboard_enable(void);
+extern void arm_atsam_asf_udi_hid_callback_keyboard_disable(void);
+extern void arm_atsam_asf_udi_hid_callback_keyboard_led(uint8_t value);
+
 //******************************************************************************
 // Keyboard interface definitions
 //******************************************************************************
+#define UDI_HID_KBD_REPORT_SIZE 8
+uint8_t udi_hid_kbd_report[UDI_HID_KBD_REPORT_SIZE];
+
 extern UDC_DESC_STORAGE udi_api_t udi_api_hid_kbd;
 extern bool                       udi_hid_kbd_b_report_valid;
 extern volatile bool              udi_hid_kbd_b_report_trans_ongoing;
@@ -86,7 +97,8 @@ bool                              udi_hid_exk_send_report(void);
 //********************************************************************************************
 // CON Console
 //********************************************************************************************
-#ifdef CONSOLE_ENABLE
+#if 0
+// #ifdef CONSOLE_ENABLE
 extern UDC_DESC_STORAGE udi_api_t udi_api_hid_con;
 extern bool                       udi_hid_con_b_report_valid;
 extern uint8_t                    udi_hid_con_report_set[UDI_HID_CON_REPORT_SIZE];
@@ -118,4 +130,4 @@ bool                              udi_hid_raw_receive_report(void);
 }
 #endif
 
-#endif  // _UDC_HID_KBD_H_
+#endif  // _UDC_HID_KBD_API_H_

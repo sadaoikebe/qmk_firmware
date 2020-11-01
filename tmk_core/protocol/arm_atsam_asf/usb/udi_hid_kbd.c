@@ -44,15 +44,12 @@
  * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
  */
 
-#include "samd51j18a.h"
-#include "d51_util.h"
 #include "conf_usb.h"
 #include "usb_protocol.h"
 #include "udd.h"
 #include "udc.h"
-#include "udi_device_conf.h"
 #include "udi_hid.h"
-#include "udi_hid_kbd.h"
+#include "udi_hid_kbd_api.h"
 #include <string.h>
 #include "report.h"
 #include "usb_descriptor_common.h"
@@ -88,6 +85,7 @@ COMPILER_WORD_ALIGNED
 uint8_t udi_hid_kbd_report[UDI_HID_KBD_REPORT_SIZE];
 
 volatile bool udi_hid_kbd_b_report_trans_ongoing;
+volatile bool udi_hid_kbd_b_enable = false;
 
 COMPILER_WORD_ALIGNED
 static uint8_t udi_hid_kbd_report_trans[UDI_HID_KBD_REPORT_SIZE];
@@ -145,10 +143,14 @@ bool udi_hid_kbd_enable(void) {
     udi_hid_kbd_b_report_trans_ongoing = false;
     memset(udi_hid_kbd_report, 0, UDI_HID_KBD_REPORT_SIZE);
     udi_hid_kbd_b_report_valid = false;
+    udi_hid_kbd_b_enable = true;
     return UDI_HID_KBD_ENABLE_EXT();
 }
 
-void udi_hid_kbd_disable(void) { UDI_HID_KBD_DISABLE_EXT(); }
+void udi_hid_kbd_disable(void) {
+    UDI_HID_KBD_DISABLE_EXT();
+    udi_hid_kbd_b_enable = false;
+}
 
 bool udi_hid_kbd_setup(void) { return udi_hid_setup(&udi_hid_kbd_rate, &udi_hid_kbd_protocol, (uint8_t *)&udi_hid_kbd_report_desc, udi_hid_kbd_setreport); }
 
@@ -166,7 +168,7 @@ static bool udi_hid_kbd_setreport(void) {
 }
 
 bool udi_hid_kbd_send_report(void) {
-    if (!main_b_kbd_enable) {
+    if (!udi_hid_kbd_b_enable) {
         return false;
     }
 
@@ -748,7 +750,8 @@ static void udi_hid_raw_report_rcvd(udd_ep_status_t status, iram_size_t nb_rcvd,
 //********************************************************************************************
 // CON
 //********************************************************************************************
-#ifdef CONSOLE_ENABLE
+#if 0
+// #ifdef CONSOLE_ENABLE
 
 bool    udi_hid_con_enable(void);
 void    udi_hid_con_disable(void);
