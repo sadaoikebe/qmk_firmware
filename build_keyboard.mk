@@ -231,6 +231,10 @@ else ifdef ARM_ATSAM
     PLATFORM=ARM_ATSAM
     PLATFORM_KEY=arm_atsam
     FIRMWARE_FORMAT=bin
+else ifdef ARM_ATSAM_ASF
+    PLATFORM=ARM_ATSAM_ASF
+    PLATFORM_KEY=arm_atsam_asf
+    FIRMWARE_FORMAT=bin
 else
     PLATFORM=AVR
     PLATFORM_KEY=avr

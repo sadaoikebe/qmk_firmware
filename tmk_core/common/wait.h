@@ -33,6 +33,10 @@ extern "C" {
 #    include "clks.h"
 #    define wait_ms(ms) CLK_delay_ms(ms)
 #    define wait_us(us) CLK_delay_us(us)
+#elif defined PROTOCOL_ARM_ATSAM_ASF
+#    include <delay.h>
+#    define wait_ms(ms) delay_ms(ms)
+#    define wait_us(us) delay_us(us)
 #else  // Unit tests
 void wait_ms(uint32_t ms);
 #    define wait_us(us) wait_ms(us / 1000)

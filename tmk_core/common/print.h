@@ -125,7 +125,35 @@ extern "C"
 
 #        endif /* USER_PRINT / NORMAL PRINT */
 
-#    endif /* __AVR__ / PROTOCOL_CHIBIOS / PROTOCOL_ARM_ATSAM */
+#    elif defined(PROTOCOL_ARM_ATSAM_ASF) /* PROTOCOL_ARM_ATSAM_ASF */
+
+#        include <compiler.h>
+
+#        ifdef USER_PRINT /* USER_PRINT */
+
+// Remove normal print defines
+#            define print(s)
+#            define println(s)
+#            define xprintf(fmt, ...)
+
+// Create user print defines
+#            define uprintf(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#            define uprint(s) uprintf(s)
+#            define uprintln(s) uprintf(s "\r\n")
+
+#        else /* NORMAL PRINT */
+
+// Create user & normal print defines
+#            define xprintf(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#            define print(s) xprintf(s)
+#            define println(s) xprintf(s "\r\n")
+#            define uprint(s) print(s)
+#            define uprintln(s) println(s)
+#            define uprintf(fmt, ...) printf(fmt, ##__VA_ARGS__)
+
+#        endif /* USER_PRINT / NORMAL PRINT */
+
+#    endif /* __AVR__ / PROTOCOL_CHIBIOS / PROTOCOL_ARM_ATSAM / PROTOCOL_ARM_ATSAM_ASF*/
 
 // User print disables the normal print messages in the body of QMK/TMK code and
 // is meant as a lightweight alternative to NOPRINT. Use it when you only want to do
