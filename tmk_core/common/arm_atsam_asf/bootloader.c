@@ -18,8 +18,7 @@
 #include <system/system.h>
 #include <wdt/wdt.h>
 
-void bootloader_jump(void)
-{
+void bootloader_jump(void) {
     struct wdt_conf config_wdt;
 
     printf("Set WDT to invoke the bootloader and stay in programming mode.\r\n");

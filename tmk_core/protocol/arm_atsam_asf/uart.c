@@ -1,3 +1,20 @@
+/*
+ * Copyright 2020 Hanyazou
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <usart/usart.h>
 
 #include "config.h"
@@ -8,66 +25,46 @@
 
 static struct usart_module usart_instance;
 
-void configure_uart(void)
-{
-#ifdef DEBUG_SOFT_SERIAL
-	struct port_config port_init;
-	port_get_config_defaults(&port_init);
+void configure_uart(void) {
+    struct usart_config config_usart;
+    usart_get_config_defaults(&config_usart);
 
-	port_init.direction = PORT_PIN_DIR_OUTPUT;
-	port_pin_set_config(DEBUG_SOFT_SERIAL_PIN, &port_init);
+    config_usart.baudrate    = 115200;
+    config_usart.mux_setting = CONF_UART_SERCOM_MUX_SETTING;
+    config_usart.pinmux_pad0 = CONF_UART_SERCOM_PINMUX_PAD0;
+    config_usart.pinmux_pad1 = CONF_UART_SERCOM_PINMUX_PAD1;
+    config_usart.pinmux_pad2 = CONF_UART_SERCOM_PINMUX_PAD2;
+    config_usart.pinmux_pad3 = CONF_UART_SERCOM_PINMUX_PAD3;
 
-	port_pin_set_output_level(DEBUG_SOFT_SERIAL_PIN, 1);
-	delay_ms(100);
-#else
-	struct usart_config config_usart;
-	usart_get_config_defaults(&config_usart);
-
-	config_usart.baudrate    = 115200;
-	config_usart.mux_setting = CONF_UART_SERCOM_MUX_SETTING;
-	config_usart.pinmux_pad0 = CONF_UART_SERCOM_PINMUX_PAD0;
-	config_usart.pinmux_pad1 = CONF_UART_SERCOM_PINMUX_PAD1;
-	config_usart.pinmux_pad2 = CONF_UART_SERCOM_PINMUX_PAD2;
-	config_usart.pinmux_pad3 = CONF_UART_SERCOM_PINMUX_PAD3;
-
-	while (usart_init(&usart_instance, CONF_UART_MODULE, &config_usart) != STATUS_OK) { }
-	usart_enable(&usart_instance);
-#endif /* DEBUG_SOFT_SERIAL */
+    while (usart_init(&usart_instance, CONF_UART_MODULE, &config_usart) != STATUS_OK) { }
+    usart_enable(&usart_instance);
 }
 
 int _write(void *fd, const char *msg, size_t len)
 {
-#ifdef DEBUG_SOFT_SERIAL
-	debug_out(msg, len);
-#else
-	usart_write_buffer_wait(&usart_instance, (const uint8_t*)msg, len);
-#endif
+    usart_write_buffer_wait(&usart_instance, (const uint8_t*)msg, len);
 
-	return len;
+    return len;
 }
 
 int _read(void *fd, char *msg, size_t len)
 {
-#ifdef DEBUG_SOFT_SERIAL
-	/* not implemented */
-#else
-	usart_read_buffer_wait(&usart_instance, (uint8_t *)msg, len);
-#endif
+    usart_read_buffer_wait(&usart_instance, (uint8_t *)msg, len);
 
-	return len;
+    return len;
 }
+
 #else /* CONSOLE_ENABLE */
-static void configure_usart(void)
-{
+
+static void configure_usart(void) {
 }
 
-int _write(void *fd, const char *msg, size_t len)
-{
-	return len;
+int _write(void *fd, const char *msg, size_t len) {
+    return len;
 }
 
-int _read(void *fd, char *msg, size_t len)
-{
-	return len;
+int _read(void *fd, char *msg, size_t len) {
+    return len;
 }
+
 #endif /* CONSOLE_ENABLE */
