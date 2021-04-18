@@ -44,3 +44,22 @@
     { K40,   K41,   K42,   KC_NO, K44,   KC_NO, KC_NO, KC_NO, K48,   KC_NO, K4A,   K4B,   K4C }, \
     { KC_NO, KC_NO, K52,   K53,   K54,   K55,   K56,   K57,   K58,   K59,   K5A,   KC_NO, K5C }, \
 }
+
+// If you want to implement two keys instead of the backspace key in the top row, you can use the following definition.
+// The key on the right is same as the 2U-wide backspace key's. (K5A)
+// The key on the left is connected to row 5, although the column cannot be seen but it's probably on column B. (K5B)
+// If it is not K5B, you need to change the definition to either K50 or K51 to see if it works.
+// #define LAYOUT( \
+//       K00,   K01,   K02,   K03,   K04,   K05,   K06,   K07,   K08,   K09,   K0A,   K0B,   K0C, K5B, K5A,  K58, \
+//       K10,   K11,   K12,   K13,   K14,   K15,   K16,   K17,   K18,   K19,   K1A,   K1B,   K1C,      K2C,  K59, \
+//       K20,   K21,   K22,   K23,   K24,   K25,   K26,   K27,   K28,   K29,   K2A,   K2B,             K5C,  K57, \
+//       K30,   K32,   K33,   K34,   K35,   K36,   K37,   K38,   K39,   K3A,   K3B,          K3C,      K55,  K53, \
+//       K40,   K41,   K42,          K44,   K48,                        K4A,   K4B,   K4C,   K56,      K54,  K52  \
+// ) { \
+//     { K00,   K01,   K02,   K03,   K04,   K05,   K06,   K07,   K08,   K09,   K0A,   K0B,   K0C }, \
+//     { K10,   K11,   K12,   K13,   K14,   K15,   K16,   K17,   K18,   K19,   K1A,   K1B,   K1C }, \
+//     { K20,   K21,   K22,   K23,   K24,   K25,   K26,   K27,   K28,   K29,   K2A,   K2B,   K2C }, \
+//     { K30,   KC_NO, K32,   K33,   K34,   K35,   K36,   K37,   K38,   K39,   K3A,   K3B,   K3C }, \
+//     { K40,   K41,   K42,   KC_NO, K44,   KC_NO, KC_NO, KC_NO, K48,   KC_NO, K4A,   K4B,   K4C }, \
+//     { KC_NO, KC_NO, K52,   K53,   K54,   K55,   K56,   K57,   K58,   K59,   K5A,   K5B, 　K5C }, \
+// }
