@@ -12,6 +12,7 @@ How to write bootloader and fuse:
 [//]: # "avrdude -p m32u4 -P COM4 -c avrisp -U hfuse:w:0xd9:m"
 
 Using ISP Programmer
+
     make thumbshift69:nicola:production
     avrdude -p m32u4 -c stk500v1 -P COM4 -b 19200 -U flash:w:thumbshift69_nicola_production.hex:i
     avrdude -p m32u4 -c stk500v1 -P COM4 -b 19200 -U hfuse:w:0xd9:m
