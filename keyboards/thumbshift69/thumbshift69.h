@@ -30,7 +30,7 @@
  * This keyboard has electrically 9 rows 8 cols switch matrix, while it looks like 5 rows 16 cols layout.
  */
 #define LAYOUT( \
-      K00,   K10,   K01,   K11,   K02,   K12,   K03,   K13,   K04,   K14,   K05,   K15,   K16,  K06,  K07,  K17, \
+      K00,   K10,   K01,   K11,   K02,   K12,   K03,   K13,   K04,   K14,   K05,   K15,   K06,  K07,  K16,  K17, \
       K20,   K30,   K21,   K31,   K22,   K32,   K23,   K33,   K24,   K34,   K25,   K35,   K26,        K27,  K37, \
       K40,   K50,   K41,   K51,   K42,   K52,   K43,   K53,   K44,   K54,   K45,   K46,               K56,  K47, \
       K60,   K61,   K71,   K62,   K72,   K63,   K73,   K64,   K74,   K65,   K55,          K66,        K67,  K57, \
