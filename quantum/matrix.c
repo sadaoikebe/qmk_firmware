@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "debounce.h"
 #include "quantum.h"
 #ifdef SPLIT_KEYBOARD
+#error SPLIT_KEYBOARD is not supported now
 #    include "split_common/split_util.h"
 #    include "split_common/transactions.h"
 
 #    define ROWS_PER_HAND (MATRIX_ROWS / 2)
 #else
-#    define ROWS_PER_HAND (MATRIX_ROWS)
+//#    define ROWS_PER_HAND (MATRIX_ROWS)
 #endif
 
 #ifdef DIRECT_PINS_RIGHT
@@ -48,17 +49,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifdef DIRECT_PINS
 static SPLIT_MUTABLE pin_t direct_pins[MATRIX_ROWS][MATRIX_COLS] = DIRECT_PINS;
-#elif (DIODE_DIRECTION == ROW2COL) || (DIODE_DIRECTION == COL2ROW)
-#    ifdef MATRIX_ROW_PINS
-static SPLIT_MUTABLE_ROW pin_t row_pins[MATRIX_ROWS] = MATRIX_ROW_PINS;
-#    endif  // MATRIX_ROW_PINS
-#    ifdef MATRIX_COL_PINS
-static SPLIT_MUTABLE_COL pin_t col_pins[MATRIX_COLS] = MATRIX_COL_PINS;
-#    endif  // MATRIX_COL_PINS
+#else
+static const pin_t row_pins[] = MATRIX_ROW_PINS;
+static const pin_t col_pins[] = MATRIX_COL_PINS;
+
+/* Consistency checking of the size of the matrix and the number of pins */
+// clang-format off
+#    if (DIODE_DIRECTION == BOTHWAYS)
+#        define NUM_ROW_PINS (MATRIX_ROWS / 2)
+#        define ROWS_PER_HAND (MATRIX_ROWS / 2)
+_Static_assert(NUM_ROW_PINS * 2 == MATRIX_ROWS, "Must be exactly divisible");
+_Static_assert(NUM_ROW_PINS == sizeof(row_pins)/sizeof(row_pins[0]), \
+    "Number of elements in MATRIX_ROW_PINS * 2 must be equal to MATRIX_ROWS");
+#    else
+#        define NUM_ROW_PINS MATRIX_ROWS
+#        define ROWS_PER_HAND (MATRIX_ROWS)
+_Static_assert(NUM_ROW_PINS == sizeof(row_pins)/sizeof(row_pins[0]), \
+    "Number of elements in MATRIX_ROW_PINS must be equal to MATRIX_ROWS");
+#    endif
+
+_Static_assert(MATRIX_COLS == sizeof(col_pins)/sizeof(col_pins[0]), \
+    "Number of elements in MATRIX_COL_PINS must be equal to MATRIX_COLS");
+// clang-format on
 #endif
 
 /* matrix state(1:on, 0:off) */
-extern matrix_row_t raw_matrix[MATRIX_ROWS];  // raw values
+static matrix_row_t raw_matrix[MATRIX_ROWS];  // raw values
 extern matrix_row_t matrix[MATRIX_ROWS];      // debounced values
 
 #ifdef SPLIT_KEYBOARD
@@ -124,10 +140,15 @@ __attribute__((weak)) void matrix_read_cols_on_row(matrix_row_t current_matrix[]
     current_matrix[current_row] = current_row_value;
 }
 
-#elif defined(DIODE_DIRECTION)
-#    if defined(MATRIX_ROW_PINS) && defined(MATRIX_COL_PINS)
-#        if (DIODE_DIRECTION == COL2ROW)
+#else
 
+#    if (DIODE_DIRECTION == COL2ROW) || (DIODE_DIRECTION == ROW2COL)
+#    elif (DIODE_DIRECTION == BOTHWAYS)
+#    else
+#        error DIODE_DIRECTION must be one of COL2ROW, ROW2COL, or BOTHWAYS!
+#    endif
+
+#    if (DIODE_DIRECTION != ROW2COL)
 static bool select_row(uint8_t row) {
     pin_t pin = row_pins[row];
     if (pin != NO_PIN) {
@@ -141,21 +162,6 @@ static void unselect_row(uint8_t row) {
     pin_t pin = row_pins[row];
     if (pin != NO_PIN) {
         setPinInputHigh_atomic(pin);
-    }
-}
-
-static void unselect_rows(void) {
-    for (uint8_t x = 0; x < ROWS_PER_HAND; x++) {
-        unselect_row(x);
-    }
-}
-
-__attribute__((weak)) void matrix_init_pins(void) {
-    unselect_rows();
-    for (uint8_t x = 0; x < MATRIX_COLS; x++) {
-        if (col_pins[x] != NO_PIN) {
-            setPinInputHigh_atomic(col_pins[x]);
-        }
     }
 }
 
@@ -184,7 +190,9 @@ __attribute__((weak)) void matrix_read_cols_on_row(matrix_row_t current_matrix[]
     current_matrix[current_row] = current_row_value;
 }
 
-#        elif (DIODE_DIRECTION == ROW2COL)
+#        endif
+
+#        if (DIODE_DIRECTION != COL2ROW)
 
 static bool select_col(uint8_t col) {
     pin_t pin = col_pins[col];
@@ -202,20 +210,6 @@ static void unselect_col(uint8_t col) {
     }
 }
 
-static void unselect_cols(void) {
-    for (uint8_t x = 0; x < MATRIX_COLS; x++) {
-        unselect_col(x);
-    }
-}
-
-__attribute__((weak)) void matrix_init_pins(void) {
-    unselect_cols();
-    for (uint8_t x = 0; x < ROWS_PER_HAND; x++) {
-        if (row_pins[x] != NO_PIN) {
-            setPinInputHigh_atomic(row_pins[x]);
-        }
-    }
-}
 
 __attribute__((weak)) void matrix_read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col) {
     bool key_pressed = false;
@@ -243,13 +237,31 @@ __attribute__((weak)) void matrix_read_rows_on_col(matrix_row_t current_matrix[]
     unselect_col(current_col);
     matrix_output_unselect_delay(current_col, key_pressed);  // wait for all Row signals to go HIGH
 }
-
-#        else
-#            error DIODE_DIRECTION must be one of COL2ROW or ROW2COL!
 #        endif
-#    endif  // defined(MATRIX_ROW_PINS) && defined(MATRIX_COL_PINS)
-#else
-#    error DIODE_DIRECTION is not defined!
+
+static void unselect_rows(void) {
+    for (uint8_t x = 0; x < ROWS_PER_HAND; x++) {
+        pin_t pin = row_pins[x];
+        if (pin != NO_PIN) {
+            setPinInputHigh_atomic(pin);
+        }
+    }
+}
+
+static void unselect_cols(void) {
+    for (uint8_t x = 0; x < MATRIX_COLS; x++) {
+        pin_t pin = col_pins[x];
+        if (pin != NO_PIN) {
+            setPinInputHigh_atomic(pin);
+        }
+    }
+}
+
+__attribute__((weak)) void matrix_init_pins(void) {
+    unselect_rows();
+    unselect_cols();
+}
+
 #endif
 
 void matrix_init(void) {
@@ -353,6 +365,13 @@ uint8_t matrix_scan(void) {
     // Set col, read rows
     for (uint8_t current_col = 0; current_col < MATRIX_COLS; current_col++) {
         matrix_read_rows_on_col(curr_matrix, current_col);
+    }
+#elif (DIODE_DIRECTION == BOTHWAYS)
+    for (uint8_t current_row = 0; current_row < MATRIX_ROWS / 2; current_row++) {
+        matrix_read_cols_on_row(curr_matrix, current_row);
+    }
+    for (uint8_t current_col = 0; current_col < MATRIX_COLS; current_col++) {
+        matrix_read_rows_on_col(curr_matrix + MATRIX_ROWS / 2, current_col);
     }
 #endif
 

@@ -79,7 +79,7 @@
         },
         "diode_direction": {
             "type": "string",
-            "enum": ["COL2ROW", "ROW2COL"]
+            "enum": ["COL2ROW", "ROW2COL", "BOTHWAYS"]
         },
         "debounce": {"$ref": "qmk.definitions.v1#/unsigned_int"},
         "combo": {
