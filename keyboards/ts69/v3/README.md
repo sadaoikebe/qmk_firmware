@@ -21,7 +21,7 @@ How to write bootloader and fuse:
 
 Using ISP Programmer
 
-    make thumbshift69:nicola:production
+    make ts69v3:nicola:production
     avrdude -p m32u4 -c stk500v1 -P COM4 -b 19200 -U flash:w:ts69_v3_nicola_production.hex:i
     avrdude -p m32u4 -c stk500v1 -P COM4 -b 19200 -U hfuse:w:0xd9:m
 
