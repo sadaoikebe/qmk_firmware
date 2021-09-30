@@ -189,9 +189,9 @@ __attribute__((weak)) void matrix_read_cols_on_row(matrix_row_t current_matrix[]
     current_matrix[current_row] = current_row_value;
 }
 
-#        endif
+#    endif
 
-#        if (DIODE_DIRECTION != COL2ROW)
+#    if (DIODE_DIRECTION != COL2ROW)
 
 static bool select_col(uint8_t col) {
     pin_t pin = col_pins[col];
@@ -208,7 +208,6 @@ static void unselect_col(uint8_t col) {
         setPinInputHigh_atomic(pin);
     }
 }
-
 
 __attribute__((weak)) void matrix_read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col) {
     bool key_pressed = false;
@@ -236,7 +235,7 @@ __attribute__((weak)) void matrix_read_rows_on_col(matrix_row_t current_matrix[]
     unselect_col(current_col);
     matrix_output_unselect_delay(current_col, key_pressed);  // wait for all Row signals to go HIGH
 }
-#        endif
+#    endif
 
 static void unselect_rows(void) {
     for (uint8_t x = 0; x < ROWS_PER_HAND; x++) {
