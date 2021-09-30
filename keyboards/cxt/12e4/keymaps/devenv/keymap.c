@@ -15,31 +15,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 bool encoder_update_user(uint8_t index, bool clockwise) {
-    // if (index == 0) {
-    //     if (clockwise) {
-    //         tap_code(KC_DOWN);
-    //     } else {
-    //         tap_code(KC_UP);
-    //     }
-    // } else if (index == 1) {
-    //     if (clockwise) {
-    //         tap_code(KC_PGDN);
-    //     } else {
-    //         tap_code(KC_PGUP);
-    //     }
-    // } else if (index == 2) {
-    //     if (clockwise) {
-    //         tap_code(KC_MS_WH_UP);
-    //     } else {
-    //         tap_code(KC_MS_WH_DOWN);
-    //     }
-    // } else if (index == 3) {
-    //     if (clockwise) {
-    //         tap_code(KC_MS_WH_LEFT);
-    //     } else {
-    //         tap_code(KC_MS_WH_RIGHT);
-    //     }
-    // }
     if (index == 0) {
         if (clockwise) {
             tap_code(KC_DOWN);
@@ -48,21 +23,21 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
         }
     } else if (index == 1) {
         if (clockwise) {
-            tap_code(KC_DOWN);
+            tap_code(KC_PGDN);
         } else {
-            tap_code(KC_UP);
+            tap_code(KC_PGUP);
         }
     } else if (index == 2) {
         if (clockwise) {
-            tap_code(KC_DOWN);
+            tap_code(KC_MS_WH_UP);
         } else {
-            tap_code(KC_UP);
+            tap_code(KC_MS_WH_DOWN);
         }
     } else if (index == 3) {
         if (clockwise) {
-            tap_code(KC_DOWN);
+            tap_code(KC_MS_WH_LEFT);
         } else {
-            tap_code(KC_UP);
+            tap_code(KC_MS_WH_RIGHT);
         }
     }
     return true;
