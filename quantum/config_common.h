@@ -21,7 +21,9 @@
 #endif
 
 /* diode directions */
-#define COL2ROW 0
-#define ROW2COL 1
+#define COL2ROW 1
+#define ROW2COL 2
+#define EITHERWAY 3 /* Compensation for diode direction dissonance */
+#define BOTHWAYS 4  /* Duplex-Matrix */
 
 #include "song_list.h"
