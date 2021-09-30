@@ -28,6 +28,12 @@
  * represents the switch matrix.
  *
  * This keyboard has electrically 5 rows 8 cols duplex matrix
+ *
+ * R1: K16 = 2u Backspace
+ * R2: (US)K27 = |\
+ * R3: (JP)K56 = ]}, (US&JP)K47 = Enter
+ * R4: (JP)K66 = _
+ * R5: K91/K94 = Henkan/Muhenkan, K83 = 6.25u Spacebar
  */
 #define LAYOUT( \
       K00,   K10,   K01,   K11,   K02,   K12,   K03,   K13,   K04,   K14,   K05,   K15,   K06,   K16,   K07,   K17, \
