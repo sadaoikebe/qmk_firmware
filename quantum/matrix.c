@@ -380,7 +380,7 @@ uint8_t matrix_scan(void) {
     debounce(raw_matrix, matrix + thisHand, ROWS_PER_HAND, changed);
     changed = (changed || matrix_post_scan());
 #else
-    debounce(raw_matrix, matrix, ROWS_PER_HAND, changed);
+    debounce(raw_matrix, matrix, MATRIX_ROWS, changed);
     matrix_scan_quantum();
 #endif
     return (uint8_t)changed;
