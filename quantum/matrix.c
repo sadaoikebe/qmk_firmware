@@ -367,8 +367,9 @@ uint8_t matrix_scan(void) {
     for (uint8_t current_row = 0; current_row < MATRIX_ROWS / 2; current_row++) {
         matrix_read_cols_on_row(curr_matrix, current_row);
     }
-    for (uint8_t current_col = 0; current_col < MATRIX_COLS; current_col++) {
-        matrix_read_rows_on_col(curr_matrix + MATRIX_ROWS / 2, current_col);
+    matrix_row_t row_shifter = MATRIX_ROW_SHIFTER;
+    for (uint8_t current_col = 0; current_col < MATRIX_COLS; current_col++, row_shifter <<= 1) {
+        matrix_read_rows_on_col(curr_matrix + MATRIX_ROWS / 2, current_col, row_shifter);
     }
 #endif
 
