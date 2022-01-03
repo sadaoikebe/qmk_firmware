@@ -25,11 +25,5 @@
 #define ROW2COL 2
 #define EITHERWAY 3 /* Compensation for diode direction dissonance */
 #define BOTHWAYS 4  /* Duplex-Matrix */
-<<<<<<< HEAD
-=======
-
-// Deprecated alias - avoid using
-#define KEYMAP LAYOUT
->>>>>>> 9cdb5e2152c9e0ce983d2da1363fbdacfd361a1f
 
 #include "song_list.h"
