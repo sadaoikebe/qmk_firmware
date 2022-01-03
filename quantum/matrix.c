@@ -212,9 +212,12 @@ static void unselect_col(uint8_t col) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 __attribute__((weak)) void matrix_read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col, matrix_row_t row_shifter) {
 =======
+=======
+>>>>>>> 9cdb5e2152c9e0ce983d2da1363fbdacfd361a1f
 __attribute__((weak)) void matrix_read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col) {
 >>>>>>> db25ceb32d (formatting)
     bool key_pressed = false;
