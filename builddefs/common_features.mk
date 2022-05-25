@@ -149,6 +149,11 @@ ifeq ($(strip $(POINTING_DEVICE_ENABLE)), yes)
     endif
 endif
 
+QUANTUM_PAINTER_ENABLE ?= no
+ifeq ($(strip $(QUANTUM_PAINTER_ENABLE)), yes)
+    include $(QUANTUM_DIR)/painter/rules.mk
+endif
+
 VALID_EEPROM_DRIVER_TYPES := vendor custom transient i2c spi
 EEPROM_DRIVER ?= vendor
 ifeq ($(filter $(EEPROM_DRIVER),$(VALID_EEPROM_DRIVER_TYPES)),)
@@ -495,7 +500,7 @@ ifeq ($(strip $(BACKLIGHT_ENABLE)), yes)
     endif
 endif
 
-VALID_WS2812_DRIVER_TYPES := bitbang pwm spi i2c
+VALID_WS2812_DRIVER_TYPES := bitbang pwm spi i2c pio
 
 WS2812_DRIVER ?= bitbang
 ifeq ($(strip $(WS2812_DRIVER_REQUIRED)), yes)
@@ -513,6 +518,8 @@ ifeq ($(strip $(WS2812_DRIVER_REQUIRED)), yes)
         ifeq ($(strip $(PLATFORM)), CHIBIOS)
             ifeq ($(strip $(WS2812_DRIVER)), pwm)
                 OPT_DEFS += -DSTM32_DMA_REQUIRED=TRUE
+            else ifeq ($(strip $(WS2812_DRIVER)), pio)
+                OPT_DEFS += -DRP_DMA_REQUIRED=TRUE
             endif
         endif
     endif
@@ -619,6 +626,7 @@ ifeq ($(strip $(SPLIT_KEYBOARD)), yes)
         ifeq ($(strip $(SERIAL_DRIVER)), bitbang)
             QUANTUM_LIB_SRC += serial.c
         else
+            QUANTUM_LIB_SRC += serial_protocol.c
             QUANTUM_LIB_SRC += serial_$(strip $(SERIAL_DRIVER)).c
         endif
     endif
@@ -646,8 +654,9 @@ ifeq ($(strip $(HAPTIC_ENABLE)),yes)
 endif
 
 ifeq ($(strip $(HD44780_ENABLE)), yes)
-    SRC += platforms/avr/drivers/hd44780.c
     OPT_DEFS += -DHD44780_ENABLE
+    COMMON_VPATH += $(DRIVER_PATH)/lcd
+    SRC += hd44780.c
 endif
 
 VALID_OLED_DRIVER_TYPES := SSD1306 custom
@@ -695,7 +704,8 @@ endif
 
 ifeq ($(strip $(UNICODE_COMMON)), yes)
     OPT_DEFS += -DUNICODE_COMMON_ENABLE
-    SRC += $(QUANTUM_DIR)/process_keycode/process_unicode_common.c
+    SRC += $(QUANTUM_DIR)/process_keycode/process_unicode_common.c \
+           $(QUANTUM_DIR)/utf8.c
 endif
 
 MAGIC_ENABLE ?= yes
