@@ -78,8 +78,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KC_EISU:
       if (record->event.pressed) {
         // NICOLA親指シフト
-        send_string(SS_TAP(X_MHEN)); // Win
-        send_string(SS_TAP(X_LANG2)); // Mac
+        send_string(SS_TAP(X_INT5)); // Win (Muhenkan key)
+        send_string(SS_TAP(X_LNG2)); // Mac
         nicola_off();
         // NICOLA親指シフト
       }
@@ -88,8 +88,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KC_KANA2:
       if (record->event.pressed) {
         // NICOLA親指シフト
-        send_string(SS_TAP(X_HENK)); // Win
-        send_string(SS_TAP(X_LANG1)); // Mac
+        send_string(SS_TAP(X_INT4)); // Win (Henkan key)
+        send_string(SS_TAP(X_LNG1)); // Mac
         nicola_on();
         // NICOLA親指シフト
       }
