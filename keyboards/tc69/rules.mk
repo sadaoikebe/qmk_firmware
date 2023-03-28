@@ -1,13 +1,9 @@
-# MCU name
 MCU = RP2040
 BOOTLOADER = rp2040
 CUSTOM_MATRIX = yes
+ANALOG_ENABLE = yes
 
-#MOUSEKEY_ENABLE = no
-#EXTRAKEY_ENABLE = no
-#CONSOLE_ENABLE = no
-#COMMAND_ENABLE = no
-#NKRO_ENABLE = yes
+NKRO_ENABLE = yes
 
 SRC +=  matrix.c
 SRC +=  analog.c

@@ -1,7 +1,6 @@
 #include QMK_KEYBOARD_H
 
-#include "pico.h"
-#include "drivers/analog.h"
+#include "analog.h"
 
 #define ADC_RING_BUFFER_SIZE 3
 
@@ -10,7 +9,7 @@ const int CAP_COL_PINS[] = { GP3, GP6, GP27, GP26 };
 #define CAP_PURGE GP28
 #define CAP_SENSE GP29
 
-const int adc_press_threshold = 150 * ADC_RING_BUFFER_SIZE;
+const int adc_press_threshold = 200 * ADC_RING_BUFFER_SIZE;
 const int adc_release_threshold = 30 * ADC_RING_BUFFER_SIZE;
 static int adc_ring_index = 0;
 
@@ -18,39 +17,46 @@ int adc_ring_buffer[ADC_RING_BUFFER_SIZE][MATRIX_COLS][MATRIX_ROWS];
 int calibration_val[MATRIX_COLS][MATRIX_ROWS];
 matrix_row_t matrix[MATRIX_ROWS];
 
+__attribute__((weak)) void matrix_init_kb(void) { matrix_init_user(); }
+
+__attribute__((weak)) void matrix_scan_kb(void) { matrix_scan_user(); }
+
+__attribute__((weak)) void matrix_init_user(void) {}
+
+__attribute__((weak)) void matrix_scan_user(void) {}
+
 void acquire_adc(int adc_measured_val[][5]) {
   for(int j=0; j<16; ++j) {
-    // digitalWrite(COLS[0], (j&1) ? HIGH : LOW);
     writePin(CAP_COL_PINS[0], (j&1) ? true : false);
-    // digitalWrite(COLS[1], (j&2) ? HIGH : LOW);
     writePin(CAP_COL_PINS[1], (j&2) ? true : false);
-    // digitalWrite(COLS[2], (j&4) ? HIGH : LOW);
     writePin(CAP_COL_PINS[2], (j&4) ? true : false);
-    // digitalWrite(COLS[3], (j&8) ? HIGH : LOW);
     writePin(CAP_COL_PINS[3], (j&8) ? true : false);
     for(int i=0; i<5; ++i) {
-      writePinHigh(CAP_ROW_PINS[i]);
-      //adc_measured_val[j][i] = 0;
-      //adc_measured_val[j][i] = adc_read();
-      adc_measured_val[j][i] = analogReadPin(CAP_SENSE);
-      //palSetLineMode(CAP_SENSE, PAL_MODE_INPUT_ANALOG);
-      //adc_measured_val[j][i] = adc_read(pinToMux(CAP_SENSE));
-      writePinLow(CAP_ROW_PINS[i]);
-      setPinOutput(CAP_PURGE);
-      writePinLow(CAP_PURGE);
-      //wait_ms(6);
-      setPinInput(CAP_PURGE);
+       setPinOutput(CAP_PURGE);
+       writePinLow(CAP_PURGE);
+       wait_us(20);
+       setPinInput(CAP_PURGE);
+
+       writePinHigh(CAP_ROW_PINS[i]);
+       wait_us(1);
+       adc_measured_val[j][i] = analogReadPin(CAP_SENSE);
+       writePinLow(CAP_ROW_PINS[i]);
     }
   }
 }
 
-void matrix_print(void) {
-}
-
 void matrix_init(void) {
-    //adc_init();
-    // adc_gpio_init(CAP_SENSE);
-    // adc_select_input(3);
+   setPinOutput(GP2);
+   setPinOutput(GP4);
+   setPinOutput(GP1);
+   setPinOutput(GP0);
+   setPinOutput(GP7);
+   setPinOutput(GP3);
+   setPinOutput(GP6);
+   setPinOutput(GP27);
+   setPinOutput(GP26);
+   setPinInput(GP28);
+   setPinInput(GP29);
 
   int adc_measured_val[MATRIX_COLS][MATRIX_ROWS];
 
@@ -77,22 +83,14 @@ void matrix_init(void) {
       }
     }
   }
+
+  matrix_init_kb();
 }
 
 uint8_t matrix_scan(void) {
     matrix_row_t curr_matrix[5] = {0, 0, 0, 0, 0};
     acquire_adc(adc_ring_buffer[adc_ring_index]);
     adc_ring_index = (adc_ring_index + 1) % ADC_RING_BUFFER_SIZE;
-
-    //Serial.print("ADC: ");
-    //for(int i=0; i<16; ++i) {
-    //  for(int j=0; j<5; ++j) {
-    //    Serial.print(adc_ring_buffer[adc_ring_index][i][j]);
-    //    Serial.print(' ');
-    //  }
-    //  Serial.println();
-    //}
-    //Serial.println();
 
     for(int i=0; i<MATRIX_COLS; ++i) {
       for(int j=0; j<MATRIX_ROWS; ++j) {
@@ -113,9 +111,15 @@ uint8_t matrix_scan(void) {
     bool changed = memcmp(matrix, curr_matrix, sizeof(curr_matrix)) != 0;
     if (changed) memcpy(matrix, curr_matrix, sizeof(curr_matrix));
 
-    return changed ? 1 : 0;
+    matrix_scan_kb();
+
+    return changed;
 }
 
 matrix_row_t matrix_get_row(uint8_t row) {
   return matrix[row];
+}
+
+void matrix_print(void)
+{
 }
