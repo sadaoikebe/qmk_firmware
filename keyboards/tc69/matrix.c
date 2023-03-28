@@ -9,8 +9,12 @@ const int CAP_COL_PINS[] = { GP3, GP6, GP27, GP26 };
 #define CAP_PURGE GP28
 #define CAP_SENSE GP29
 
-const int adc_press_threshold = 200 * ADC_RING_BUFFER_SIZE;
+const int adc_press_threshold = 120 * ADC_RING_BUFFER_SIZE;
 const int adc_release_threshold = 30 * ADC_RING_BUFFER_SIZE;
+
+const int adc_press_threshold_2 = 220 * ADC_RING_BUFFER_SIZE;
+const int adc_release_threshold_2 = 80 * ADC_RING_BUFFER_SIZE;
+
 static int adc_ring_index = 0;
 
 int adc_ring_buffer[ADC_RING_BUFFER_SIZE][MATRIX_COLS][MATRIX_ROWS];
@@ -24,6 +28,10 @@ __attribute__((weak)) void matrix_scan_kb(void) { matrix_scan_user(); }
 __attribute__((weak)) void matrix_init_user(void) {}
 
 __attribute__((weak)) void matrix_scan_user(void) {}
+
+bool is_home_position(int i, int j) {
+  return (i == 7) && (j == 2); // I often lean my left pinky on the A key
+}
 
 void acquire_adc(int adc_measured_val[][5]) {
   for(int j=0; j<16; ++j) {
@@ -99,10 +107,14 @@ uint8_t matrix_scan(void) {
           adc_total += adc_ring_buffer[k][i][j];
         }
 
-        if(adc_total > calibration_val[i][j] + adc_press_threshold) {
+        bool home_position = is_home_position(i, j);
+        int press_threshold = home_position ? adc_press_threshold_2 : adc_press_threshold;
+        int release_threshold = home_position ? adc_release_threshold_2 : adc_release_threshold;
+
+        if(adc_total > calibration_val[i][j] + press_threshold) {
           curr_matrix[j] |= (1 << i);
         }
-        else if(adc_total < calibration_val[i][j] + adc_release_threshold) {
+        else if(adc_total < calibration_val[i][j] + release_threshold) {
           curr_matrix[j] &= ~(1 << i);
         }
       }
