@@ -61,3 +61,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   #define NO_ACTION_MACRO
   #define NO_ACTION_FUNCTION
 #endif
+
+#define ENCODERS_PAD_A { D0 }
+#define ENCODERS_PAD_B { D1 }
+#define ENCODER_RESOLUTIONS { 4 }
+
