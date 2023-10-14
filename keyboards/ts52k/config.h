@@ -65,4 +65,3 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define ENCODERS_PAD_A { D0 }
 #define ENCODERS_PAD_B { D1 }
 #define ENCODER_RESOLUTIONS { 4 }
-
