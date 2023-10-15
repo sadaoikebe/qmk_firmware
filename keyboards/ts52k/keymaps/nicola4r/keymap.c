@@ -89,18 +89,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       break;
   }
 
-  // NICOLA親指シフト
   bool a = true;
   nicola_mode(keycode, record);
   a = process_nicola(keycode, record);
   if (a == false) return false;
-  // NICOLA親指シフト
-
-// as kbd101 layer driver on windows recognizes the IME on/off key, we no longer need to disguise as 106 keyboard
-//   bool continue_process = process_jtu(keycode, record);
-//   if (continue_process == false) {
-//     return false;
-//   }
 
   return true;
 }

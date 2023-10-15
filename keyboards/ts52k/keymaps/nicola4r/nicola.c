@@ -71,6 +71,8 @@ void set_nicola(uint8_t layer) {
 #ifdef TIMEOUT_INTERRUPT
   keypress_timer_init(keypress_timer_expired);
 #endif
+  nicola_m_key = KC_NO;
+  nicola_o_key = KC_NO;
 }
 
 // 親指シフトをオンオフ
@@ -78,18 +80,12 @@ void nicola_on(void) {
   is_nicola = true;
   nicola_clear();
   layer_on(nicola_layer);
-
-//   tap_code(KC_LANG1); // Mac
-//   tap_code(KC_HENK); // Win
 }
 
 void nicola_off(void) {
   is_nicola = false;
   nicola_clear();
   layer_off(nicola_layer);
-
-//   tap_code(KC_LANG2); // Mac
-//   tap_code(KC_MHEN); // Win
 }
 
 // 親指シフトの状態
@@ -99,6 +95,26 @@ bool nicola_state(void) {
 
 // バッファをクリアする
 void nicola_clear(void) {
+
+    switch(nicola_int_state) {
+        case NICOLA_STATE_S1_INIT:
+            break;
+        case NICOLA_STATE_S2_M:
+            nicola_m_release();
+            break;
+        case NICOLA_STATE_S3_O:
+            nicola_o_release();
+            break;
+        case NICOLA_STATE_S4_MO:
+            nicola_om_release();
+            break;
+        case NICOLA_STATE_S5_OM:
+            nicola_om_release();
+            break;
+    }
+
+  nicola_m_key = KC_NO;
+  nicola_o_key = KC_NO;
   nicola_int_state = NICOLA_STATE_S1_INIT;
   key_process_guard = 0;
   nicola_m_pressed = false;
@@ -138,7 +154,6 @@ void nicola_mode(uint16_t keycode, keyrecord_t *record) {
 
 #define SS_ALNUM(x) SS_TAP(X_CAPSLOCK) x SS_TAP(X_CAPSLOCK)
 
-
 #define UNREG_SHIFT() \
           if (lshift) { unregister_code(KC_LSFT); lshift_to_reg = true; } \
           if (rshift) { unregister_code(KC_RSFT); rshift_to_reg = true; }
@@ -164,19 +179,6 @@ void nicola_m_press(void) {
         nicola_om_release();
     }
     switch(nicola_m_key) {
-        case NG_1   : send_string("1" ); break;
-        case NG_2   : send_string("2" ); break;
-        case NG_3   : send_string("3" ); break;
-        case NG_4   : send_string("4" ); break;
-        case NG_5   : send_string("5" ); break;
-        case NG_6   : send_string("6" ); break;
-        case NG_7   : send_string("7" ); break;
-        case NG_8   : send_string("8" ); break;
-        case NG_9   : send_string("9" ); break;
-        case NG_0   : send_string("0" ); break;
-        case NG_MINS: send_string("-" ); break;
-        case NG_EQL : send_string(SS_LSFT("-") ); break; // =
-
         case NG_Q   : send_string("." ); break;
         case NG_W   : send_string("ka"); break;
         case NG_E   : send_string("ta"); break;
@@ -257,23 +259,10 @@ void nicola_m_press(void) {
 }
 
 void nicola_m_release(void) {
-    if(!nicola_m_pressed) {
+    if(!nicola_m_pressed && nicola_m_key > 0) {
         nicola_m_press();
     }
     switch(nicola_m_key) {
-        case NG_1   :  break;
-        case NG_2   :  break;
-        case NG_3   :  break;
-        case NG_4   :  break;
-        case NG_5   :  break;
-        case NG_6   :  break;
-        case NG_7   :  break;
-        case NG_8   :  break;
-        case NG_9   :  break;
-        case NG_0   :  break;
-        case NG_MINS:  break;
-        case NG_EQL :  break;
-
         case NG_Q   : break;
         case NG_W   : break;
         case NG_E   : break;
@@ -351,6 +340,7 @@ void nicola_m_release(void) {
         case NG_E_SLSH: unregister_code(KC_SLSH); break;
     }
     nicola_m_pressed = false;
+    nicola_m_key = KC_NO;
 }
 
 void nicola_o_press(void) {
@@ -370,13 +360,14 @@ void nicola_o_press(void) {
 }
 
 void nicola_o_release(void) {
-    if(!nicola_o_pressed) {
+    if(!nicola_o_pressed && nicola_o_key > 0) {
         nicola_o_press();
     }
     if(nicola_o_key != 0) {
         unregister_code(KC_SPC);
     }
     nicola_o_pressed = false;
+    nicola_o_key = KC_NO;
 }
 
 void nicola_om_press(void) {
@@ -432,19 +423,6 @@ void nicola_om_press(void) {
 
     if(nicola_o_key == NG_SHFTL) {
         switch(nicola_m_key) {
-            case NG_1   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_SLASH)))); break;
-            case NG_2   : send_string(SS_ALNUM(SS_TAP(X_SLASH))); break;
-            case NG_3   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_EQUAL)))); break; // ~
-            case NG_4   : send_string("]" ); break; // [
-            case NG_5   : send_string(SS_TAP(X_NUHS)); break; // ]
-            case NG_6   : send_string(SS_LSFT("]" )); break; // {
-            case NG_7   : send_string(SS_LSFT(SS_TAP(X_NUHS))); break; // }
-            case NG_8   : send_string(SS_LSFT(SS_TAP(X_QUOT)) ); break; // *
-            case NG_9   : send_string("*" ); break; // (
-            case NG_0   : send_string("(" ); break; // )
-            case NG_MINS: send_string(SS_LSFT(SS_TAP(X_INT1))); break; // _
-            case NG_EQL : send_string(SS_LSFT(";")); break; // +
-
             case NG_Q   : send_string("xa"); break;
             case NG_W   : send_string("e" ); break;
             case NG_E   : send_string("ri"); break;
@@ -484,19 +462,6 @@ void nicola_om_press(void) {
         }
     } else if(nicola_o_key == NG_SHFTR) {
         switch(nicola_m_key) {
-            case NG_1   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_SLASH)))); break;
-            case NG_2   : send_string(SS_ALNUM(SS_TAP(X_SLASH))); break;
-            case NG_3   : send_string(SS_ALNUM(SS_LSFT(SS_TAP(X_EQUAL)))); break; // ~
-            case NG_4   : send_string("]" ); break; // [
-            case NG_5   : send_string(SS_TAP(X_NUHS)); break; // ]
-            case NG_6   : send_string(SS_LSFT("]" )); break; // {
-            case NG_7   : send_string(SS_LSFT(SS_TAP(X_NUHS))); break; // }
-            case NG_8   : send_string(SS_LSFT(SS_TAP(X_QUOT)) ); break; // *
-            case NG_9   : send_string("*" ); break; // (
-            case NG_0   : send_string("(" ); break; // )
-            case NG_MINS: send_string(SS_LSFT(SS_TAP(X_INT1))); break; // _
-            case NG_EQL : send_string(SS_LSFT(";")); break; // +
-
             case NG_Q   :                    break;
             case NG_W   : send_string("ga"); break;
             case NG_E   : send_string("da"); break;
@@ -539,7 +504,7 @@ void nicola_om_press(void) {
 }
 
 void nicola_om_release(void) {
-    if(!nicola_om_pressed) {
+    if(!nicola_om_pressed && nicola_m_key > 0 && nicola_o_key > 0) {
         nicola_om_press();
     }
     switch(nicola_m_key) {
@@ -583,6 +548,8 @@ void nicola_om_release(void) {
         case NG_E_SLSH: unregister_code(KC_BSLS);break;
     }
     nicola_om_pressed = false;
+    nicola_m_key = KC_NO;
+    nicola_o_key = KC_NO;
 }
 
 // 親指シフトの入力処理
