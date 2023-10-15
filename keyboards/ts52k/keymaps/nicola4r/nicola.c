@@ -40,7 +40,9 @@ typedef enum {
 
 static nicola_state_t nicola_int_state = NICOLA_STATE_S1_INIT;
 static int nicola_m_key;
+static uint8_t nicola_m_mods;
 static int nicola_o_key;
+static uint8_t nicola_o_mods;
 static uint16_t nicola_m_time;
 static uint16_t nicola_o_time;
 static bool nicola_m_pressed;
@@ -73,6 +75,8 @@ void set_nicola(uint8_t layer) {
 #endif
   nicola_m_key = KC_NO;
   nicola_o_key = KC_NO;
+  nicola_m_mods = 0;
+  nicola_o_mods = 0;
 }
 
 // 親指シフトをオンオフ
@@ -154,6 +158,14 @@ void nicola_mode(uint16_t keycode, keyrecord_t *record) {
 
 #define SS_ALNUM(x) SS_TAP(X_CAPSLOCK) x SS_TAP(X_CAPSLOCK)
 
+bool is_nicola_m_key(uint16_t keycode) {
+    return NG_M_TOP <= keycode && keycode <= NG_M_BOTTOM;
+}
+
+bool is_nicola_o_key(uint16_t keycode) {
+    return keycode == NG_SHFTL || keycode == NG_SHFTR;
+}
+
 #define UNREG_SHIFT() \
           if (lshift) { unregister_code(KC_LSFT); lshift_to_reg = true; } \
           if (rshift) { unregister_code(KC_RSFT); rshift_to_reg = true; }
@@ -177,6 +189,18 @@ void nicola_m_press(void) {
     }
     if(nicola_om_pressed) {
         nicola_om_release();
+    }
+    uint8_t mods = get_mods();
+    uint8_t reg_mods = 0;
+    uint8_t unreg_mods = 0;
+    if(is_nicola_m_key(nicola_m_key)){
+        uint8_t common_mods = nicola_m_mods & mods;
+        uint8_t common_nomods = ~(nicola_m_mods | mods);
+        uint8_t diff_mods = nicola_m_mods ^ mods;
+        reg_mods = (nicola_m_mods & ~common_mods) & diff_mods;
+        unreg_mods = (~nicola_m_mods & ~common_nomods) & diff_mods;
+        register_mods(reg_mods);
+        unregister_mods(unreg_mods);
     }
     switch(nicola_m_key) {
         case NG_Q   : send_string("." ); break;
@@ -255,11 +279,15 @@ void nicola_m_press(void) {
         case NG_E_DOT : register_code(KC_DOT ); break;
         case NG_E_SLSH: register_code(KC_SLSH); break;
     }
+    if(is_nicola_m_key(nicola_m_key)){
+        unregister_mods(reg_mods);
+        register_mods(unreg_mods);
+    }
     nicola_m_pressed = true;
 }
 
 void nicola_m_release(void) {
-    if(!nicola_m_pressed && nicola_m_key > 0) {
+    if(!nicola_m_pressed && is_nicola_m_key(nicola_m_key)) {
         nicola_m_press();
     }
     switch(nicola_m_key) {
@@ -353,14 +381,30 @@ void nicola_o_press(void) {
     if(nicola_om_pressed) {
         nicola_om_release();
     }
-    if(nicola_o_key != 0) {
+    uint8_t mods = get_mods();
+    uint8_t reg_mods = 0;
+    uint8_t unreg_mods = 0;
+    if(is_nicola_o_key(nicola_o_key)){
+        uint8_t common_mods = nicola_o_mods & mods;
+        uint8_t common_nomods = ~(nicola_o_mods | mods);
+        uint8_t diff_mods = nicola_o_mods ^ mods;
+        reg_mods = (nicola_o_mods & ~common_mods) & diff_mods;
+        unreg_mods = (~nicola_o_mods & ~common_nomods) & diff_mods;
+        register_mods(reg_mods);
+        unregister_mods(unreg_mods);
+    }
+    if(is_nicola_o_key(nicola_o_key)){
         register_code(KC_SPC);
+    }
+    if(is_nicola_o_key(nicola_o_key)){
+        unregister_mods(reg_mods);
+        register_mods(unreg_mods);
     }
     nicola_o_pressed = true;
 }
 
 void nicola_o_release(void) {
-    if(!nicola_o_pressed && nicola_o_key > 0) {
+    if(!nicola_o_pressed && is_nicola_o_key(nicola_o_key)) {
         nicola_o_press();
     }
     if(nicola_o_key != 0) {
@@ -379,6 +423,19 @@ void nicola_om_press(void) {
     }
     if(nicola_om_pressed) {
         nicola_om_release();
+    }
+    uint8_t mods = get_mods();
+    uint8_t reg_mods = 0;
+    uint8_t unreg_mods = 0;
+    if(is_nicola_m_key(nicola_m_key) && is_nicola_o_key(nicola_o_key)) {
+        uint8_t mods_to = nicola_m_mods & nicola_o_mods;
+        uint8_t common_mods = mods_to & mods;
+        uint8_t common_nomods = ~(mods_to | mods);
+        uint8_t diff_mods = mods_to ^ mods;
+        reg_mods = (mods_to & ~common_mods) & diff_mods;
+        unreg_mods = (~mods_to & ~common_nomods) & diff_mods;
+        register_mods(reg_mods);
+        unregister_mods(unreg_mods);
     }
     switch(nicola_m_key) {
         case NG_E_TAB   : register_code(KC_GRV); break;
@@ -500,11 +557,15 @@ void nicola_om_press(void) {
             case NG_SLSH: send_string("xo"); break;
         }
     }
+    if(is_nicola_m_key(nicola_m_key) && is_nicola_o_key(nicola_o_key)) {
+        unregister_mods(reg_mods);
+        register_mods(unreg_mods);
+    }
     nicola_om_pressed = true;
 }
 
 void nicola_om_release(void) {
-    if(!nicola_om_pressed && nicola_m_key > 0 && nicola_o_key > 0) {
+    if(!nicola_om_pressed && is_nicola_m_key(nicola_m_key) && is_nicola_o_key(nicola_o_key)) {
         nicola_om_press();
     }
     switch(nicola_m_key) {
@@ -560,7 +621,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
   uint16_t curr_time = timer_read();
 
   if (record->event.pressed) {
-    if(NG_M_TOP <= keycode && keycode <= NG_M_BOTTOM) {
+    if(is_nicola_m_key(keycode)) {
         // M key
         switch(nicola_int_state) {
           case NICOLA_STATE_S1_INIT:
@@ -610,10 +671,11 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             break;
         }
         nicola_m_key = keycode;
+        nicola_m_mods = get_mods();
         nicola_m_time = curr_time;
         keypress_timer_start(TIMEOUT_THRESHOLD * 16);
         cont_process = false;
-    } else if(keycode == NG_SHFTL || keycode == NG_SHFTR) {
+    } else if(is_nicola_o_key(keycode)) {
         // O key
         switch(nicola_int_state) {
           case NICOLA_STATE_S1_INIT:
@@ -663,6 +725,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             break;
         }
         nicola_o_key = keycode;
+        nicola_o_mods = get_mods();
         nicola_o_time = curr_time;
         keypress_timer_start(TIMEOUT_THRESHOLD * 16);
         cont_process = false;
