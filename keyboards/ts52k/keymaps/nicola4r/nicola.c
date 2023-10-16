@@ -166,19 +166,40 @@ bool is_nicola_o_key(uint16_t keycode) {
     return keycode == NG_SHFTL || keycode == NG_SHFTR;
 }
 
-#define UNREG_SHIFT() \
-          if (lshift) { unregister_code(KC_LSFT); lshift_to_reg = true; } \
-          if (rshift) { unregister_code(KC_RSFT); rshift_to_reg = true; }
+bool is_nicola_left_finger(uint16_t keycode) {
+    return NG_LEFT_FINGER_TOP <= keycode && keycode <= NG_LEFT_FINGER_BOTTOM;
+}
 
-#define CLOSE_UNREG_SHIFT() \
-          if (lshift_to_reg) { register_code(KC_LSFT); lshift_to_reg = false; } \
-          if (rshift_to_reg) { register_code(KC_RSFT); rshift_to_reg = false; }
+bool is_nicola_right_finger(uint16_t keycode) {
+    return NG_RIGHT_FINGER_TOP <= keycode && keycode <= NG_RIGHT_FINGER_BOTTOM;
+}
 
-#define REG_SHIFT() \
-          { register_code(KC_RSFT); rshift_to_unreg = true; }
+bool is_cross_shift(uint16_t m, uint16_t o) {
+    return (is_nicola_left_finger(m) && o == NG_SHFTR) || (is_nicola_right_finger(m) && o == NG_SHFTL);
+}
 
-#define CLOSE_REG_SHIFT() \
-          if (rshift_to_unreg) { unregister_code(KC_RSFT); rshift_to_unreg = false; }
+
+typedef struct {
+  uint8_t reg_mods;
+  uint8_t unreg_mods;
+} RUMods;
+
+RUMods modify_mods(uint8_t new_mods) {
+  uint8_t curr_mods = get_mods();
+  uint8_t common_mods = new_mods & curr_mods;
+  uint8_t common_nomods = ~(new_mods | curr_mods);
+  uint8_t diff_mods = new_mods ^ curr_mods;
+  uint8_t reg_mods = (new_mods & ~common_mods) & diff_mods;
+  uint8_t unreg_mods = (~new_mods & ~common_nomods) & diff_mods;
+  register_mods(reg_mods);
+  unregister_mods(unreg_mods);
+  return (RUMods){reg_mods, unreg_mods};
+}
+
+void unmodify_mods(RUMods new_mods) {
+  unregister_mods(new_mods.reg_mods);
+  register_mods(new_mods.unreg_mods);
+}
 
 void nicola_m_press(void) {
     if(nicola_m_pressed) {
@@ -190,17 +211,9 @@ void nicola_m_press(void) {
     if(nicola_om_pressed) {
         nicola_om_release();
     }
-    uint8_t mods = get_mods();
-    uint8_t reg_mods = 0;
-    uint8_t unreg_mods = 0;
+    RUMods regunreg_mods = {0, 0};
     if(is_nicola_m_key(nicola_m_key)){
-        uint8_t common_mods = nicola_m_mods & mods;
-        uint8_t common_nomods = ~(nicola_m_mods | mods);
-        uint8_t diff_mods = nicola_m_mods ^ mods;
-        reg_mods = (nicola_m_mods & ~common_mods) & diff_mods;
-        unreg_mods = (~nicola_m_mods & ~common_nomods) & diff_mods;
-        register_mods(reg_mods);
-        unregister_mods(unreg_mods);
+      regunreg_mods = modify_mods(nicola_m_mods);
     }
     switch(nicola_m_key) {
         case NG_Q   : send_string("." ); break;
@@ -280,8 +293,7 @@ void nicola_m_press(void) {
         case NG_E_SLSH: register_code(KC_SLSH); break;
     }
     if(is_nicola_m_key(nicola_m_key)){
-        unregister_mods(reg_mods);
-        register_mods(unreg_mods);
+        unmodify_mods(regunreg_mods);
     }
     nicola_m_pressed = true;
 }
@@ -381,24 +393,16 @@ void nicola_o_press(void) {
     if(nicola_om_pressed) {
         nicola_om_release();
     }
-    uint8_t mods = get_mods();
-    uint8_t reg_mods = 0;
-    uint8_t unreg_mods = 0;
+
+    RUMods regunreg_mods = {0, 0};
     if(is_nicola_o_key(nicola_o_key)){
-        uint8_t common_mods = nicola_o_mods & mods;
-        uint8_t common_nomods = ~(nicola_o_mods | mods);
-        uint8_t diff_mods = nicola_o_mods ^ mods;
-        reg_mods = (nicola_o_mods & ~common_mods) & diff_mods;
-        unreg_mods = (~nicola_o_mods & ~common_nomods) & diff_mods;
-        register_mods(reg_mods);
-        unregister_mods(unreg_mods);
+      regunreg_mods = modify_mods(nicola_o_mods);
     }
     if(is_nicola_o_key(nicola_o_key)){
         register_code(KC_SPC);
     }
     if(is_nicola_o_key(nicola_o_key)){
-        unregister_mods(reg_mods);
-        register_mods(unreg_mods);
+        unmodify_mods(regunreg_mods);
     }
     nicola_o_pressed = true;
 }
@@ -424,18 +428,10 @@ void nicola_om_press(void) {
     if(nicola_om_pressed) {
         nicola_om_release();
     }
-    uint8_t mods = get_mods();
-    uint8_t reg_mods = 0;
-    uint8_t unreg_mods = 0;
+
+    RUMods regunreg_mods = {0, 0};
     if(is_nicola_m_key(nicola_m_key) && is_nicola_o_key(nicola_o_key)) {
-        uint8_t mods_to = nicola_m_mods & nicola_o_mods;
-        uint8_t common_mods = mods_to & mods;
-        uint8_t common_nomods = ~(mods_to | mods);
-        uint8_t diff_mods = mods_to ^ mods;
-        reg_mods = (mods_to & ~common_mods) & diff_mods;
-        unreg_mods = (~mods_to & ~common_nomods) & diff_mods;
-        register_mods(reg_mods);
-        unregister_mods(unreg_mods);
+      regunreg_mods = modify_mods(nicola_m_mods | nicola_o_mods | (is_cross_shift(nicola_m_key, nicola_o_key) ? MOD_BIT(KC_LSFT) : 0));
     }
     switch(nicola_m_key) {
         case NG_E_TAB   : register_code(KC_GRV); break;
@@ -480,86 +476,85 @@ void nicola_om_press(void) {
 
     if(nicola_o_key == NG_SHFTL) {
         switch(nicola_m_key) {
-            case NG_Q   : send_string("xa"); break;
-            case NG_W   : send_string("e" ); break;
-            case NG_E   : send_string("ri"); break;
-            case NG_R   : send_string("xya");break;
-            case NG_T   : send_string("re"); break;
-            case NG_Y   : send_string("pa"); break;
-            case NG_U   : send_string("di"); break;
-            case NG_I   : send_string("gu"); break;
-            case NG_O   : send_string("du"); break;
-            case NG_P   : send_string("pi"); break;
-            case NG_LBRC: send_string("]" ); break;
-            case NG_RBRC: send_string(SS_TAP(X_NUHS)); break;
-            case NG_BSLS: register_code(KC_DEL); break;
+          case NG_Q   : send_string("xa"); break;
+          case NG_W   : send_string("e" ); break;
+          case NG_E   : send_string("ri"); break;
+          case NG_R   : send_string("xya");break;
+          case NG_T   : send_string("re"); break;
+          case NG_Y   : send_string("pa"); break;
+          case NG_U   : send_string("di"); break;
+          case NG_I   : send_string("gu"); break;
+          case NG_O   : send_string("du"); break;
+          case NG_P   : send_string("pi"); break;
+          case NG_LBRC: send_string("]" ); break;
+          case NG_RBRC: send_string(SS_TAP(X_NUHS)); break;
+          case NG_BSLS: register_code(KC_DEL); break;
 
-            case NG_A   : send_string("wo"); break;
-            case NG_S   : send_string("a" ); break;
-            case NG_D   : send_string("na"); break;
-            case NG_F   : send_string("xyu");break;
-            case NG_G   : send_string("mo"); break;
-            case NG_H   : send_string("ba"); break;
-            case NG_J   : send_string("do"); break;
-            case NG_K   : send_string("gi"); break;
-            case NG_L   : send_string("po"); break;
-            case NG_SCLN:                    break;
-            case NG_QUOT: register_code(KC_BSPC); break;
+          case NG_A   : send_string("wo"); break;
+          case NG_S   : send_string("a" ); break;
+          case NG_D   : send_string("na"); break;
+          case NG_F   : send_string("xyu");break;
+          case NG_G   : send_string("mo"); break;
+          case NG_H   : send_string("ba"); break;
+          case NG_J   : send_string("do"); break;
+          case NG_K   : send_string("gi"); break;
+          case NG_L   : send_string("po"); break;
+          case NG_SCLN:                    break;
+          case NG_QUOT: register_code(KC_BSPC); break;
 
-            case NG_Z   : send_string("xu"); break;
-            case NG_X   : send_string("-" ); break;
-            case NG_C   : send_string("ro"); break;
-            case NG_V   : send_string("ya"); break;
-            case NG_B   : send_string("xi"); break;
-            case NG_N   : send_string("pu"); break;
-            case NG_M   : send_string("zo"); break;
-            case NG_COMM: send_string("pe"); break;
-            case NG_DOT : send_string("bo"); break;
-            case NG_SLSH: send_string("?" ); break;
+          case NG_Z   : send_string("xu"); break;
+          case NG_X   : send_string("-" ); break;
+          case NG_C   : send_string("ro"); break;
+          case NG_V   : send_string("ya"); break;
+          case NG_B   : send_string("xi"); break;
+          case NG_N   : send_string("pu"); break;
+          case NG_M   : send_string("zo"); break;
+          case NG_COMM: send_string("pe"); break;
+          case NG_DOT : send_string("bo"); break;
+          case NG_SLSH: send_string("?" ); break;
         }
     } else if(nicola_o_key == NG_SHFTR) {
         switch(nicola_m_key) {
-            case NG_Q   :                    break;
-            case NG_W   : send_string("ga"); break;
-            case NG_E   : send_string("da"); break;
-            case NG_R   : send_string("go"); break;
-            case NG_T   : send_string("za"); break;
-            case NG_Y   : send_string("yo"); break;
-            case NG_U   : send_string("ni"); break;
-            case NG_I   : send_string("ru"); break;
-            case NG_O   : send_string("ma"); break;
-            case NG_P   : send_string("xe"); break;
-            case NG_LBRC: send_string("[" ); break;
-            case NG_RBRC: send_string("]" ); break;
-            case NG_BSLS: register_code(KC_DEL); break;
+          case NG_Q   :                    break;
+          case NG_W   : send_string("ga"); break;
+          case NG_E   : send_string("da"); break;
+          case NG_R   : send_string("go"); break;
+          case NG_T   : send_string("za"); break;
+          case NG_Y   : send_string("yo"); break;
+          case NG_U   : send_string("ni"); break;
+          case NG_I   : send_string("ru"); break;
+          case NG_O   : send_string("ma"); break;
+          case NG_P   : send_string("xe"); break;
+          case NG_LBRC: send_string("[" ); break;
+          case NG_RBRC: send_string("]" ); break;
+          case NG_BSLS: register_code(KC_DEL); break;
 
-            case NG_A   : send_string("vu"); break;
-            case NG_S   : send_string("zi"); break;
-            case NG_D   : send_string("de"); break;
-            case NG_F   : send_string("ge"); break;
-            case NG_G   : send_string("ze"); break;
-            case NG_H   : send_string("mi"); break;
-            case NG_J   : send_string("o" ); break;
-            case NG_K   : send_string("no"); break;
-            case NG_L   : send_string("xyo");break;
-            case NG_SCLN: send_string("xtu");break;
-            case NG_QUOT: register_code(KC_BSPC); break;
+          case NG_A   : send_string("vu"); break;
+          case NG_S   : send_string("zi"); break;
+          case NG_D   : send_string("de"); break;
+          case NG_F   : send_string("ge"); break;
+          case NG_G   : send_string("ze"); break;
+          case NG_H   : send_string("mi"); break;
+          case NG_J   : send_string("o" ); break;
+          case NG_K   : send_string("no"); break;
+          case NG_L   : send_string("xyo");break;
+          case NG_SCLN: send_string("xtu");break;
+          case NG_QUOT: register_code(KC_BSPC); break;
 
-            case NG_Z   :                    break;
-            case NG_X   : send_string("bi"); break;
-            case NG_C   : send_string("zu"); break;
-            case NG_V   : send_string("bu"); break;
-            case NG_B   : send_string("be"); break;
-            case NG_N   : send_string("nu"); break;
-            case NG_M   : send_string("yu"); break;
-            case NG_COMM: send_string("mu"); break;
-            case NG_DOT : send_string("wa"); break;
-            case NG_SLSH: send_string("xo"); break;
+          case NG_Z   :                    break;
+          case NG_X   : send_string("bi"); break;
+          case NG_C   : send_string("zu"); break;
+          case NG_V   : send_string("bu"); break;
+          case NG_B   : send_string("be"); break;
+          case NG_N   : send_string("nu"); break;
+          case NG_M   : send_string("yu"); break;
+          case NG_COMM: send_string("mu"); break;
+          case NG_DOT : send_string("wa"); break;
+          case NG_SLSH: send_string("xo"); break;
         }
     }
     if(is_nicola_m_key(nicola_m_key) && is_nicola_o_key(nicola_o_key)) {
-        unregister_mods(reg_mods);
-        register_mods(unreg_mods);
+        unmodify_mods(regunreg_mods);
     }
     nicola_om_pressed = true;
 }
@@ -569,7 +564,7 @@ void nicola_om_release(void) {
         nicola_om_press();
     }
     switch(nicola_m_key) {
-        case NG_E_TAB   : unregister_code(KC_GRV); break;
+        case NG_E_TAB : unregister_code(KC_GRV); break;
 
         case NG_E_Q   : unregister_code(KC_F1); break;
         case NG_E_W   : unregister_code(KC_F2); break;
@@ -610,13 +605,13 @@ void nicola_om_release(void) {
     }
     if(nicola_o_key == NG_SHFTL) {
         switch(nicola_m_key) {
-            case NG_BSLS: unregister_code(KC_DEL); break;
-            case NG_QUOT: unregister_code(KC_BSPC); break;
+          case NG_BSLS: unregister_code(KC_DEL); break;
+          case NG_QUOT: unregister_code(KC_BSPC); break;
         }
     } else if(nicola_o_key == NG_SHFTR) {
         switch(nicola_m_key) {
-            case NG_BSLS: unregister_code(KC_DEL); break;
-            case NG_QUOT: unregister_code(KC_BSPC); break;
+          case NG_BSLS: unregister_code(KC_DEL); break;
+          case NG_QUOT: unregister_code(KC_BSPC); break;
         }
     }
     nicola_om_pressed = false;
