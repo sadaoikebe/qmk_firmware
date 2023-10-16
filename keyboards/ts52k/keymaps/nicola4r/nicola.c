@@ -178,6 +178,9 @@ bool is_cross_shift(uint16_t m, uint16_t o) {
     return (is_nicola_left_finger(m) && o == NG_SHFTR) || (is_nicola_right_finger(m) && o == NG_SHFTL);
 }
 
+bool is_nicola_eisu(uint16_t keycode) {
+    return (NG_EISU1_TOP <= keycode && keycode <= NG_EISU1_BOTTOM) || (NG_EISU2_TOP <= keycode && keycode <= NG_EISU2_BOTTOM);
+}
 
 typedef struct {
   uint8_t reg_mods;
@@ -431,7 +434,8 @@ void nicola_om_press(void) {
 
     RUMods regunreg_mods = {0, 0};
     if(is_nicola_m_key(nicola_m_key) && is_nicola_o_key(nicola_o_key)) {
-      regunreg_mods = modify_mods(nicola_m_mods | nicola_o_mods | (is_cross_shift(nicola_m_key, nicola_o_key) ? MOD_BIT(KC_LSFT) : 0));
+      regunreg_mods = modify_mods((nicola_m_mods | nicola_o_mods)
+       ^ ((is_cross_shift(nicola_m_key, nicola_o_key) && is_nicola_eisu(nicola_m_key)) ? MOD_BIT(KC_LSFT) : 0));
     }
     switch(nicola_m_key) {
         case NG_E_TAB   : register_code(KC_GRV); break;

@@ -33,6 +33,7 @@ typedef enum nicola_keycodes {
 
   NG_E_TAB = NG_TOP,
   NG_LEFT_FINGER_TOP = NG_E_TAB,
+  NG_EISU1_TOP = NG_E_TAB,
 
   NG_E_Q,
   NG_E_W,
@@ -51,6 +52,7 @@ typedef enum nicola_keycodes {
   NG_E_C,
   NG_E_V,
   NG_E_B,
+  NG_EISU1_BOTTOM = NG_E_B,
 
   NG_Q,
   NG_W,
@@ -74,6 +76,7 @@ typedef enum nicola_keycodes {
 
   NG_E_Y,
   NG_RIGHT_FINGER_TOP = NG_E_Y,
+  NG_EISU2_TOP = NG_E_Y,
   NG_E_U,
   NG_E_I,
   NG_E_O,
@@ -94,6 +97,7 @@ typedef enum nicola_keycodes {
   NG_E_COMM,
   NG_E_DOT,
   NG_E_SLSH,
+  NG_EISU2_BOTTOM = NG_E_SLSH,
 
   NG_Y,
   NG_U,
