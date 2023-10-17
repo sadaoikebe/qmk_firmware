@@ -434,8 +434,21 @@ void nicola_om_press(void) {
 
     RUMods regunreg_mods = {0, 0};
     if(is_nicola_m_key(nicola_m_key) && is_nicola_o_key(nicola_o_key)) {
-      regunreg_mods = modify_mods((nicola_m_mods | nicola_o_mods)
-       ^ ((is_cross_shift(nicola_m_key, nicola_o_key) && is_nicola_eisu(nicola_m_key)) ? MOD_BIT(KC_LSFT) : 0));
+      uint8_t trig_mods = nicola_m_mods | nicola_o_mods;
+      if(is_nicola_eisu(nicola_m_key)) {
+        bool trig_shift = (trig_mods & MOD_BIT(KC_LSFT)) || (trig_mods & MOD_BIT(KC_RSFT));
+        bool cross_shift = is_cross_shift(nicola_m_key, nicola_o_key);
+        bool is_shift = (trig_shift || cross_shift) && !(trig_shift && cross_shift);
+        if(is_nicola && trig_shift) {
+          is_shift = !is_shift; // kana + shift tweak: requires same thumb shift experience as eisu typing
+        }
+        if(trig_shift && !is_shift) {
+            trig_mods = trig_mods & ~(MOD_BIT(KC_LSFT) | MOD_BIT(KC_RSFT));
+        } else if(!trig_shift && is_shift) {
+            trig_mods = trig_mods | MOD_BIT(KC_LSFT);
+        }
+      }
+      regunreg_mods = modify_mods(trig_mods);
     }
     switch(nicola_m_key) {
         case NG_E_TAB   : register_code(KC_GRV); break;
