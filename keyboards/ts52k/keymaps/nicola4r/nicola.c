@@ -228,9 +228,9 @@ void nicola_m_press(void) {
         case NG_U   : send_string("ti"); break;
         case NG_I   : send_string("ku"); break;
         case NG_O   : send_string("tu"); break;
-        case NG_P   : send_string(SS_ALNUM(SS_TAP(X_COMMA))); break; // ，
+        case NG_P   : send_string("," ); break;
         case NG_LBRC: send_string("," ); break;
-        case NG_RBRC: send_string(";" ); break;
+        case NG_RBRC:                    break;
         case NG_BSLS: register_code(KC_BSPC); break;
 
         case NG_A   : send_string("u" ); break;
@@ -503,8 +503,8 @@ void nicola_om_press(void) {
           case NG_I   : send_string("gu"); break;
           case NG_O   : send_string("du"); break;
           case NG_P   : send_string("pi"); break;
-          case NG_LBRC: send_string("]" ); break;
-          case NG_RBRC: send_string(SS_TAP(X_NUHS)); break;
+          case NG_LBRC: send_string("_" ); break;
+          case NG_RBRC: send_string("+" ); break;
           case NG_BSLS: register_code(KC_DEL); break;
 
           case NG_A   : send_string("wo"); break;
@@ -542,8 +542,8 @@ void nicola_om_press(void) {
           case NG_I   : send_string("ru"); break;
           case NG_O   : send_string("ma"); break;
           case NG_P   : send_string("xe"); break;
-          case NG_LBRC: send_string("[" ); break;
-          case NG_RBRC: send_string("]" ); break;
+          case NG_LBRC: send_string("-" ); break;
+          case NG_RBRC: send_string("=" ); break;
           case NG_BSLS: register_code(KC_DEL); break;
 
           case NG_A   : send_string("vu"); break;
