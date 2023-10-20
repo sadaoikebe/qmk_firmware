@@ -228,9 +228,9 @@ void nicola_m_press(void) {
         case NG_U   : send_string("ti"); break;
         case NG_I   : send_string("ku"); break;
         case NG_O   : send_string("tu"); break;
-        case NG_P   : send_string("," ); break;
+        case NG_P   : send_string(SS_ALNUM(SS_TAP(X_COMMA))); break; // ，
         case NG_LBRC: send_string("," ); break;
-        case NG_RBRC:                    break;
+        case NG_RBRC: send_string(";" ); break;
         case NG_BSLS: register_code(KC_BSPC); break;
 
         case NG_A   : send_string("u" ); break;
