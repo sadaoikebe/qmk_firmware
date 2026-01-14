@@ -638,6 +638,9 @@ void nicola_om_release(void) {
 
 // 親指シフトの入力処理
 bool process_nicola(uint16_t keycode, keyrecord_t *record) {
+  if(keycode >= KC_LCTL && keycode <= KC_RGUI) {
+    return true;
+  }
   key_process_guard = 1; // timeout entrance guard
   bool cont_process = true;
   // if (!is_nicola || n_modifier > 0) return true;
