@@ -27,7 +27,7 @@ static bool is_nicola = false; // 親指シフトがオンかオフか
 static uint8_t nicola_layer = 0; // レイヤー番号
 static uint8_t n_modifier = 0; // 押しているmodifierキーの数
 
-#define TIMEOUT_THRESHOLD (150)
+#define TIMEOUT_THRESHOLD (80)
 #define OVERLAP_THRESHOLD (20)
 
 typedef enum {
@@ -209,42 +209,42 @@ void nicola_m_press(void) {
         nicola_om_release();
     }
     switch(nicola_m_key) {
-        case NG_Q   : send_string("." ); break;
-        case NG_W   : send_string("ka"); break;
-        case NG_E   : send_string("ta"); break;
-        case NG_R   : send_string("ko"); break;
-        case NG_T   : send_string("sa"); break;
-        case NG_Y   : send_string("ra"); break;
-        case NG_U   : send_string("ti"); break;
-        case NG_I   : send_string("ku"); break;
-        case NG_O   : send_string("tu"); break;
-        case NG_P   : send_string(SS_ALNUM(SS_TAP(X_COMMA))); break; // ，
-        case NG_LBRC: send_string("," ); break;
-        case NG_RBRC: send_string(";" ); break;
+        case NG_Q   : register_code(KC_DOT); break; // "."
+        case NG_W   : register_code(KC_K);register_code(KC_A); break; // "ka"
+        case NG_E   : register_code(KC_T);register_code(KC_A); break; // "ta"
+        case NG_R   : register_code(KC_K);register_code(KC_O); break; // "ko"
+        case NG_T   : register_code(KC_S);register_code(KC_A); break; // "sa"
+        case NG_Y   : register_code(KC_R);register_code(KC_A); break; // "ra"
+        case NG_U   : register_code(KC_T);register_code(KC_I); break; // "ti"
+        case NG_I   : register_code(KC_K);register_code(KC_U); break; // "ku"
+        case NG_O   : register_code(KC_T);register_code(KC_U); break; // "tu"
+        case NG_P   : register_code(KC_COMM); break; // ","
+        case NG_LBRC: register_code(KC_COMM); break; // ","
+        case NG_RBRC: register_code(KC_SCLN); break; // ";"
         case NG_BSLS: register_code(KC_BSPC); break;
 
-        case NG_A   : send_string("u" ); break;
-        case NG_S   : send_string("si"); break;
-        case NG_D   : send_string("te"); break;
-        case NG_F   : send_string("ke"); break;
-        case NG_G   : send_string("se"); break;
-        case NG_H   : send_string("ha"); break;
-        case NG_J   : send_string("to"); break;
-        case NG_K   : send_string("ki"); break;
-        case NG_L   : send_string("i" ); break;
-        case NG_SCLN: send_string("nn"); break;
+        case NG_A   : register_code(KC_U); break; // "u"
+        case NG_S   : register_code(KC_S);register_code(KC_I); break; // "si"
+        case NG_D   : register_code(KC_T);register_code(KC_E); break; // "te"
+        case NG_F   : register_code(KC_K);register_code(KC_E); break; // "ke"
+        case NG_G   : register_code(KC_S);register_code(KC_E); break; // "se"
+        case NG_H   : register_code(KC_H);register_code(KC_A); break; // "ha"
+        case NG_J   : register_code(KC_T);register_code(KC_O); break; // "to"
+        case NG_K   : register_code(KC_K);register_code(KC_I); break; // "ki"
+        case NG_L   : register_code(KC_I); break; // "i"
+        case NG_SCLN: register_code(KC_N);register_code(KC_N); break; // "nn"
         case NG_QUOT: register_code(KC_BSPC); break;
 
-        case NG_Z   : send_string(SS_ALNUM(SS_TAP(X_DOT))); break; // ，
-        case NG_X   : send_string("hi"); break;
-        case NG_C   : send_string("su"); break;
-        case NG_V   : send_string("hu"); break;
-        case NG_B   : send_string("he"); break;
-        case NG_N   : send_string("me"); break;
-        case NG_M   : send_string("so"); break;
-        case NG_COMM: send_string("ne"); break;
-        case NG_DOT : send_string("ho"); break;
-        case NG_SLSH: send_string("/" ); break;
+        case NG_Z   : register_code(KC_DOT); break; // "."
+        case NG_X   : register_code(KC_H);register_code(KC_I); break; // "hi"
+        case NG_C   : register_code(KC_S);register_code(KC_U); break; // "su"
+        case NG_V   : register_code(KC_H);register_code(KC_U); break; // "hu"
+        case NG_B   : register_code(KC_H);register_code(KC_E); break; // "he"
+        case NG_N   : register_code(KC_M);register_code(KC_E); break; // "me"
+        case NG_M   : register_code(KC_S);register_code(KC_O); break; // "so"
+        case NG_COMM: register_code(KC_N);register_code(KC_E); break; // "ne"
+        case NG_DOT : register_code(KC_H);register_code(KC_O); break; // "ho"
+        case NG_SLSH: register_code(KC_SLSH); break; // "/"
 
         case NG_E_TAB   : register_code(KC_TAB); break;
 
@@ -294,42 +294,42 @@ void nicola_m_release(void) {
         nicola_m_press();
     }
     switch(nicola_m_key) {
-        case NG_Q   : break;
-        case NG_W   : break;
-        case NG_E   : break;
-        case NG_R   : break;
-        case NG_T   : break;
-        case NG_Y   : break;
-        case NG_U   : break;
-        case NG_I   : break;
-        case NG_O   : break;
-        case NG_P   : break;
-        case NG_LBRC: break;
-        case NG_RBRC: break;
+        case NG_Q   : unregister_code(KC_DOT); break; // "."
+        case NG_W   : unregister_code(KC_K);unregister_code(KC_A); break; // "ka"
+        case NG_E   : unregister_code(KC_T);unregister_code(KC_A); break; // "ta"
+        case NG_R   : unregister_code(KC_K);unregister_code(KC_O); break; // "ko"
+        case NG_T   : unregister_code(KC_S);unregister_code(KC_A); break; // "sa"
+        case NG_Y   : unregister_code(KC_R);unregister_code(KC_A); break; // "ra"
+        case NG_U   : unregister_code(KC_T);unregister_code(KC_I); break; // "ti"
+        case NG_I   : unregister_code(KC_K);unregister_code(KC_U); break; // "ku"
+        case NG_O   : unregister_code(KC_T);unregister_code(KC_U); break; // "tu"
+        case NG_P   : unregister_code(KC_COMM); break; // ","
+        case NG_LBRC: unregister_code(KC_COMM); break; // ","
+        case NG_RBRC: unregister_code(KC_SCLN); break; // ";"
         case NG_BSLS: unregister_code(KC_BSPC); break;
 
-        case NG_A   : break;
-        case NG_S   : break;
-        case NG_D   : break;
-        case NG_F   : break;
-        case NG_G   : break;
-        case NG_H   : break;
-        case NG_J   : break;
-        case NG_K   : break;
-        case NG_L   : break;
-        case NG_SCLN: break;
+        case NG_A   : unregister_code(KC_U); break; // "u"
+        case NG_S   : unregister_code(KC_S);unregister_code(KC_I); break; // "si"
+        case NG_D   : unregister_code(KC_T);unregister_code(KC_E); break; // "te"
+        case NG_F   : unregister_code(KC_K);unregister_code(KC_E); break; // "ke"
+        case NG_G   : unregister_code(KC_S);unregister_code(KC_E); break; // "se"
+        case NG_H   : unregister_code(KC_H);unregister_code(KC_A); break; // "ha"
+        case NG_J   : unregister_code(KC_T);unregister_code(KC_O); break; // "to"
+        case NG_K   : unregister_code(KC_K);unregister_code(KC_I); break; // "ki"
+        case NG_L   : unregister_code(KC_I); break; // "i"
+        case NG_SCLN: unregister_code(KC_N);unregister_code(KC_N); break; // "nn"
         case NG_QUOT: unregister_code(KC_BSPC); break;
 
-        case NG_Z   : break;
-        case NG_X   : break;
-        case NG_C   : break;
-        case NG_V   : break;
-        case NG_B   : break;
-        case NG_N   : break;
-        case NG_M   : break;
-        case NG_COMM: break;
-        case NG_DOT : break;
-        case NG_SLSH: break;
+        case NG_Z   : unregister_code(KC_DOT); break; // "."
+        case NG_X   : unregister_code(KC_H);unregister_code(KC_I); break; // "hi"
+        case NG_C   : unregister_code(KC_S);unregister_code(KC_U); break; // "su"
+        case NG_V   : unregister_code(KC_H);unregister_code(KC_U); break; // "hu"
+        case NG_B   : unregister_code(KC_H);unregister_code(KC_E); break; // "he"
+        case NG_N   : unregister_code(KC_M);unregister_code(KC_E); break; // "me"
+        case NG_M   : unregister_code(KC_S);unregister_code(KC_O); break; // "so"
+        case NG_COMM: unregister_code(KC_N);unregister_code(KC_E); break; // "ne"
+        case NG_DOT : unregister_code(KC_H);unregister_code(KC_O); break; // "ho"
+        case NG_SLSH: unregister_code(KC_SLSH); break; // "/"
 
         case NG_E_TAB   : unregister_code(KC_TAB); break;
 
@@ -426,6 +426,16 @@ void nicola_om_press(void) {
         // Nicolaモード: 英数キーがくるということはすでに小指Shiftが押されている。
         //    同側シフトで小指シフトリリースイベント  クロスシフトでは何もしない    invert_pinky_shift = !eisu_cross_shift
         invert_pinky_shift = (eisu_cross_shift != is_nicola);
+    } else {
+        if(nicola_o_key == NG_SHFTL) {
+            switch(nicola_m_key) {
+            case NG_LBRC:
+            case NG_RBRC:
+            case NG_SLSH:
+                invert_pinky_shift = true;
+                break;
+            }
+        }
     }
 
     if(invert_pinky_shift) {
@@ -483,81 +493,81 @@ void nicola_om_press(void) {
 
     if(nicola_o_key == NG_SHFTL) {
         switch(nicola_m_key) {
-          case NG_Q   : send_string("xa"); break;
-          case NG_W   : send_string("e" ); break;
-          case NG_E   : send_string("ri"); break;
-          case NG_R   : send_string("xya");break;
-          case NG_T   : send_string("re"); break;
-          case NG_Y   : send_string("pa"); break;
-          case NG_U   : send_string("di"); break;
-          case NG_I   : send_string("gu"); break;
-          case NG_O   : send_string("du"); break;
-          case NG_P   : send_string("pi"); break;
-          case NG_LBRC: send_string("_" ); break;
-          case NG_RBRC: send_string("+" ); break;
-          case NG_BSLS: register_code(KC_DEL); break;
+          case NG_Q   : register_code(KC_X);register_code(KC_A); break; // "xa"
+          case NG_W   : register_code(KC_E);                     break; // "e"
+          case NG_E   : register_code(KC_R);register_code(KC_I); break; // "ri"
+          case NG_R   : register_code(KC_X);register_code(KC_Y);register_code(KC_A); break; // "xya"
+          case NG_T   : register_code(KC_R);register_code(KC_E); break; // "re"
+          case NG_Y   : register_code(KC_P);register_code(KC_A); break; // "pa"
+          case NG_U   : register_code(KC_D);register_code(KC_I); break; // "di"
+          case NG_I   : register_code(KC_G);register_code(KC_U); break; // "gu"
+          case NG_O   : register_code(KC_D);register_code(KC_U); break; // "du"
+          case NG_P   : register_code(KC_P);register_code(KC_I); break; // "pi"
+          case NG_LBRC: register_code(KC_MINS); break; // "_" invert_pinky_shift
+          case NG_RBRC: register_code(KC_EQL);  break; // "+" invert_pinky_shift
+          case NG_BSLS: register_code(KC_DEL);  break;
 
-          case NG_A   : send_string("wo"); break;
-          case NG_S   : send_string("a" ); break;
-          case NG_D   : send_string("na"); break;
-          case NG_F   : send_string("xyu");break;
-          case NG_G   : send_string("mo"); break;
-          case NG_H   : send_string("ba"); break;
-          case NG_J   : send_string("do"); break;
-          case NG_K   : send_string("gi"); break;
-          case NG_L   : send_string("po"); break;
-          case NG_SCLN:                    break;
+          case NG_A   : register_code(KC_W);register_code(KC_O); break; // "wo"
+          case NG_S   : register_code(KC_A);                     break; // "a"
+          case NG_D   : register_code(KC_N);register_code(KC_A); break; // "na"
+          case NG_F   : register_code(KC_X);register_code(KC_Y);register_code(KC_U); break; // "xyu"
+          case NG_G   : register_code(KC_M);register_code(KC_O); break; // "mo"
+          case NG_H   : register_code(KC_B);register_code(KC_A); break; // "ba"
+          case NG_J   : register_code(KC_D);register_code(KC_O); break; // "do"
+          case NG_K   : register_code(KC_G);register_code(KC_I); break; // "gi"
+          case NG_L   : register_code(KC_P);register_code(KC_O); break; // "po"
+          case NG_SCLN:                         break;
           case NG_QUOT: register_code(KC_BSPC); break;
 
-          case NG_Z   : send_string("xu"); break;
-          case NG_X   : send_string("-" ); break;
-          case NG_C   : send_string("ro"); break;
-          case NG_V   : send_string("ya"); break;
-          case NG_B   : send_string("xi"); break;
-          case NG_N   : send_string("pu"); break;
-          case NG_M   : send_string("zo"); break;
-          case NG_COMM: send_string("pe"); break;
-          case NG_DOT : send_string("bo"); break;
-          case NG_SLSH: send_string("?" ); break;
+          case NG_Z   : register_code(KC_X);register_code(KC_U); break; // "xu"
+          case NG_X   : register_code(KC_MINS);                  break; // "-"
+          case NG_C   : register_code(KC_R);register_code(KC_O); break; // "ro"
+          case NG_V   : register_code(KC_Y);register_code(KC_A); break; // "ya"
+          case NG_B   : register_code(KC_X);register_code(KC_I); break; // "xi"
+          case NG_N   : register_code(KC_P);register_code(KC_U); break; // "pu"
+          case NG_M   : register_code(KC_Z);register_code(KC_O); break; // "zo"
+          case NG_COMM: register_code(KC_P);register_code(KC_E); break; // "pe"
+          case NG_DOT : register_code(KC_B);register_code(KC_O); break; // "bo"
+          case NG_SLSH: register_code(KC_SLSH);                  break; // "?" invert_pinky_shift
         }
     } else if(nicola_o_key == NG_SHFTR) {
         switch(nicola_m_key) {
-          case NG_Q   :                    break;
-          case NG_W   : send_string("ga"); break;
-          case NG_E   : send_string("da"); break;
-          case NG_R   : send_string("go"); break;
-          case NG_T   : send_string("za"); break;
-          case NG_Y   : send_string("yo"); break;
-          case NG_U   : send_string("ni"); break;
-          case NG_I   : send_string("ru"); break;
-          case NG_O   : send_string("ma"); break;
-          case NG_P   : send_string("xe"); break;
-          case NG_LBRC: send_string("-" ); break;
-          case NG_RBRC: send_string("=" ); break;
-          case NG_BSLS: register_code(KC_DEL); break;
+          case NG_Q   :                         break;
+          case NG_W   : register_code(KC_G);register_code(KC_A); break; // "ga"
+          case NG_E   : register_code(KC_D);register_code(KC_A); break; // "da"
+          case NG_R   : register_code(KC_G);register_code(KC_O); break; // "go"
+          case NG_T   : register_code(KC_Z);register_code(KC_A); break; // "za"
+          case NG_Y   : register_code(KC_Y);register_code(KC_O); break; // "yo"
+          case NG_U   : register_code(KC_N);register_code(KC_I); break; // "ni"
+          case NG_I   : register_code(KC_R);register_code(KC_U); break; // "ru"
+          case NG_O   : register_code(KC_M);register_code(KC_A); break; // "ma"
+          case NG_P   : register_code(KC_X);register_code(KC_E); break; // "xe"
+          case NG_LBRC: register_code(KC_MINS); break; // "-"
+          case NG_RBRC: register_code(KC_EQL);  break; // "="
+          case NG_BSLS: register_code(KC_DEL);  break;
 
-          case NG_A   : send_string("vu"); break;
-          case NG_S   : send_string("zi"); break;
-          case NG_D   : send_string("de"); break;
-          case NG_F   : send_string("ge"); break;
-          case NG_G   : send_string("ze"); break;
-          case NG_H   : send_string("mi"); break;
-          case NG_J   : send_string("o" ); break;
-          case NG_K   : send_string("no"); break;
-          case NG_L   : send_string("xyo");break;
-          case NG_SCLN: send_string("xtu");break;
+          case NG_A   : register_code(KC_V);register_code(KC_U); break; // "vu"
+          case NG_S   : register_code(KC_Z);register_code(KC_I); break; // "zi"
+          case NG_D   : register_code(KC_D);register_code(KC_E); break; // "de"
+          case NG_F   : register_code(KC_G);register_code(KC_E); break; // "ge"
+          case NG_G   : register_code(KC_Z);register_code(KC_E); break; // "ze"
+          case NG_H   : register_code(KC_M);register_code(KC_I); break; // "mi"
+          case NG_J   : register_code(KC_O);                     break; // "o"
+          case NG_K   : register_code(KC_N);register_code(KC_O); break; // "no"
+          case NG_L   : register_code(KC_X);register_code(KC_Y);register_code(KC_O); break; // "xyo"
+          case NG_SCLN: register_code(KC_X);register_code(KC_T);register_code(KC_U); break; // "xtu"
           case NG_QUOT: register_code(KC_BSPC); break;
 
           case NG_Z   :                    break;
-          case NG_X   : send_string("bi"); break;
-          case NG_C   : send_string("zu"); break;
-          case NG_V   : send_string("bu"); break;
-          case NG_B   : send_string("be"); break;
-          case NG_N   : send_string("nu"); break;
-          case NG_M   : send_string("yu"); break;
-          case NG_COMM: send_string("mu"); break;
-          case NG_DOT : send_string("wa"); break;
-          case NG_SLSH: send_string("xo"); break;
+          case NG_X   : register_code(KC_B);register_code(KC_I); break; // "bi"
+          case NG_C   : register_code(KC_Z);register_code(KC_U); break; // "zu"
+          case NG_V   : register_code(KC_B);register_code(KC_U); break; // "bu"
+          case NG_B   : register_code(KC_B);register_code(KC_E); break; // "be"
+          case NG_N   : register_code(KC_N);register_code(KC_U); break; // "nu"
+          case NG_M   : register_code(KC_Y);register_code(KC_U); break; // "yu"
+          case NG_COMM: register_code(KC_M);register_code(KC_U); break; // "mu"
+          case NG_DOT : register_code(KC_W);register_code(KC_A); break; // "wa"
+          case NG_SLSH: register_code(KC_X);register_code(KC_O); break; // "xo"
         }
     }
 
@@ -614,13 +624,81 @@ void nicola_om_release(void) {
     }
     if(nicola_o_key == NG_SHFTL) {
         switch(nicola_m_key) {
-          case NG_BSLS: unregister_code(KC_DEL); break;
+          case NG_Q   : unregister_code(KC_X);unregister_code(KC_A); break; // "xa"
+          case NG_W   : unregister_code(KC_E);                     break; // "e"
+          case NG_E   : unregister_code(KC_R);unregister_code(KC_I); break; // "ri"
+          case NG_R   : unregister_code(KC_X);unregister_code(KC_Y);unregister_code(KC_A); break; // "xya"
+          case NG_T   : unregister_code(KC_R);unregister_code(KC_E); break; // "re"
+          case NG_Y   : unregister_code(KC_P);unregister_code(KC_A); break; // "pa"
+          case NG_U   : unregister_code(KC_D);unregister_code(KC_I); break; // "di"
+          case NG_I   : unregister_code(KC_G);unregister_code(KC_U); break; // "gu"
+          case NG_O   : unregister_code(KC_D);unregister_code(KC_U); break; // "du"
+          case NG_P   : unregister_code(KC_P);unregister_code(KC_I); break; // "pi"
+          case NG_LBRC: unregister_code(KC_MINS); break; // "_" ***
+          case NG_RBRC: unregister_code(KC_EQL);  break; // "+" ***
+          case NG_BSLS: unregister_code(KC_DEL);  break;
+
+          case NG_A   : unregister_code(KC_W);unregister_code(KC_O); break; // "wo"
+          case NG_S   : unregister_code(KC_A);                       break; // "a"
+          case NG_D   : unregister_code(KC_N);unregister_code(KC_A); break; // "na"
+          case NG_F   : unregister_code(KC_X);unregister_code(KC_Y);unregister_code(KC_U); break; // "xyu"
+          case NG_G   : unregister_code(KC_M);unregister_code(KC_O); break; // "mo"
+          case NG_H   : unregister_code(KC_B);unregister_code(KC_A); break; // "ba"
+          case NG_J   : unregister_code(KC_D);unregister_code(KC_O); break; // "do"
+          case NG_K   : unregister_code(KC_G);unregister_code(KC_I); break; // "gi"
+          case NG_L   : unregister_code(KC_P);unregister_code(KC_O); break; // "po"
+          case NG_SCLN:                           break;
           case NG_QUOT: unregister_code(KC_BSPC); break;
+
+          case NG_Z   : unregister_code(KC_X);unregister_code(KC_U); break; // "xu"
+          case NG_X   : unregister_code(KC_MINS);                  break; // "-"
+          case NG_C   : unregister_code(KC_R);unregister_code(KC_O); break; // "ro"
+          case NG_V   : unregister_code(KC_Y);unregister_code(KC_A); break; // "ya"
+          case NG_B   : unregister_code(KC_X);unregister_code(KC_I); break; // "xi"
+          case NG_N   : unregister_code(KC_P);unregister_code(KC_U); break; // "pu"
+          case NG_M   : unregister_code(KC_Z);unregister_code(KC_O); break; // "zo"
+          case NG_COMM: unregister_code(KC_P);unregister_code(KC_E); break; // "pe"
+          case NG_DOT : unregister_code(KC_B);unregister_code(KC_O); break; // "bo"
+          case NG_SLSH: unregister_code(KC_SLSH);                  break; // "?" ***
         }
     } else if(nicola_o_key == NG_SHFTR) {
         switch(nicola_m_key) {
-          case NG_BSLS: unregister_code(KC_DEL); break;
+          case NG_Q   :                         break;
+          case NG_W   : unregister_code(KC_G);unregister_code(KC_A); break; // "ga"
+          case NG_E   : unregister_code(KC_D);unregister_code(KC_A); break; // "da"
+          case NG_R   : unregister_code(KC_G);unregister_code(KC_O); break; // "go"
+          case NG_T   : unregister_code(KC_Z);unregister_code(KC_A); break; // "za"
+          case NG_Y   : unregister_code(KC_Y);unregister_code(KC_O); break; // "yo"
+          case NG_U   : unregister_code(KC_N);unregister_code(KC_I); break; // "ni"
+          case NG_I   : unregister_code(KC_R);unregister_code(KC_U); break; // "ru"
+          case NG_O   : unregister_code(KC_M);unregister_code(KC_A); break; // "ma"
+          case NG_P   : unregister_code(KC_X);unregister_code(KC_E); break; // "xe"
+          case NG_LBRC: unregister_code(KC_MINS); break; // "-"
+          case NG_RBRC: unregister_code(KC_EQL);  break; // "="
+          case NG_BSLS: unregister_code(KC_DEL);  break;
+
+          case NG_A   : unregister_code(KC_V);unregister_code(KC_U); break; // "vu"
+          case NG_S   : unregister_code(KC_Z);unregister_code(KC_I); break; // "zi"
+          case NG_D   : unregister_code(KC_D);unregister_code(KC_E); break; // "de"
+          case NG_F   : unregister_code(KC_G);unregister_code(KC_E); break; // "ge"
+          case NG_G   : unregister_code(KC_Z);unregister_code(KC_E); break; // "ze"
+          case NG_H   : unregister_code(KC_M);unregister_code(KC_I); break; // "mi"
+          case NG_J   : unregister_code(KC_O);                       break; // "o"
+          case NG_K   : unregister_code(KC_N);unregister_code(KC_O); break; // "no"
+          case NG_L   : unregister_code(KC_X);unregister_code(KC_Y);unregister_code(KC_O); break; // "xyo"
+          case NG_SCLN: unregister_code(KC_X);unregister_code(KC_T);unregister_code(KC_U); break; // "xtu"
           case NG_QUOT: unregister_code(KC_BSPC); break;
+
+          case NG_Z   :                    break;
+          case NG_X   : unregister_code(KC_B);unregister_code(KC_I); break; // "bi"
+          case NG_C   : unregister_code(KC_Z);unregister_code(KC_U); break; // "zu"
+          case NG_V   : unregister_code(KC_B);unregister_code(KC_U); break; // "bu"
+          case NG_B   : unregister_code(KC_B);unregister_code(KC_E); break; // "be"
+          case NG_N   : unregister_code(KC_N);unregister_code(KC_U); break; // "nu"
+          case NG_M   : unregister_code(KC_Y);unregister_code(KC_U); break; // "yu"
+          case NG_COMM: unregister_code(KC_M);unregister_code(KC_U); break; // "mu"
+          case NG_DOT : unregister_code(KC_W);unregister_code(KC_A); break; // "wa"
+          case NG_SLSH: unregister_code(KC_X);unregister_code(KC_O); break; // "xo"
         }
     }
     nicola_om_pressed = false;
