@@ -40,14 +40,32 @@ typedef enum {
 
 static nicola_state_t nicola_int_state = NICOLA_STATE_S1_INIT;
 static int nicola_m_key;
-static uint8_t nicola_m_mods;
 static int nicola_o_key;
-static uint8_t nicola_o_mods;
 static uint16_t nicola_m_time;
 static uint16_t nicola_o_time;
 static bool nicola_m_pressed;
 static bool nicola_o_pressed;
 static bool nicola_om_pressed;
+
+#define NICOLA_MAX_PENDING_EVENTS 8
+typedef struct {
+    uint16_t keycode;
+    bool pressed;
+} pending_event_t;
+
+pending_event_t nicola_pending_events[NICOLA_MAX_PENDING_EVENTS];
+uint8_t nicola_pending_count = 0;
+
+void nicola_flush_pending_events(void) {
+    for(uint8_t i=0; i<nicola_pending_count; ++i) {
+        if(nicola_pending_events[i].pressed) {
+            register_code16(nicola_pending_events[i].keycode);
+        } else {
+            unregister_code16(nicola_pending_events[i].keycode);
+        }
+    }
+    nicola_pending_count = 0;
+}
 
 static int key_process_guard = 0;
 void keypress_timer_expired(void);
@@ -75,8 +93,6 @@ void set_nicola(uint8_t layer) {
 #endif
   nicola_m_key = KC_NO;
   nicola_o_key = KC_NO;
-  nicola_m_mods = 0;
-  nicola_o_mods = 0;
 }
 
 // 親指シフトをオンオフ
@@ -182,28 +198,6 @@ bool is_nicola_eisu(uint16_t keycode) {
     return (NG_EISU1_TOP <= keycode && keycode <= NG_EISU1_BOTTOM) || (NG_EISU2_TOP <= keycode && keycode <= NG_EISU2_BOTTOM);
 }
 
-typedef struct {
-  uint8_t reg_mods;
-  uint8_t unreg_mods;
-} RUMods;
-
-RUMods modify_mods(uint8_t new_mods) {
-  uint8_t curr_mods = get_mods();
-  uint8_t common_mods = new_mods & curr_mods;
-  uint8_t common_nomods = ~(new_mods | curr_mods);
-  uint8_t diff_mods = new_mods ^ curr_mods;
-  uint8_t reg_mods = (new_mods & ~common_mods) & diff_mods;
-  uint8_t unreg_mods = (~new_mods & ~common_nomods) & diff_mods;
-  register_mods(reg_mods);
-  unregister_mods(unreg_mods);
-  return (RUMods){reg_mods, unreg_mods};
-}
-
-void unmodify_mods(RUMods new_mods) {
-  unregister_mods(new_mods.reg_mods);
-  register_mods(new_mods.unreg_mods);
-}
-
 void nicola_m_press(void) {
     if(nicola_m_pressed) {
         nicola_m_release();
@@ -213,10 +207,6 @@ void nicola_m_press(void) {
     }
     if(nicola_om_pressed) {
         nicola_om_release();
-    }
-    RUMods regunreg_mods = {0, 0};
-    if(is_nicola_m_key(nicola_m_key)){
-      regunreg_mods = modify_mods(nicola_m_mods);
     }
     switch(nicola_m_key) {
         case NG_Q   : send_string("." ); break;
@@ -295,10 +285,8 @@ void nicola_m_press(void) {
         case NG_E_DOT : register_code(KC_DOT ); break;
         case NG_E_SLSH: register_code(KC_SLSH); break;
     }
-    if(is_nicola_m_key(nicola_m_key)){
-        unmodify_mods(regunreg_mods);
-    }
     nicola_m_pressed = true;
+    nicola_flush_pending_events();
 }
 
 void nicola_m_release(void) {
@@ -384,6 +372,7 @@ void nicola_m_release(void) {
     }
     nicola_m_pressed = false;
     nicola_m_key = KC_NO;
+    nicola_flush_pending_events();
 }
 
 void nicola_o_press(void) {
@@ -397,17 +386,11 @@ void nicola_o_press(void) {
         nicola_om_release();
     }
 
-    RUMods regunreg_mods = {0, 0};
-    if(is_nicola_o_key(nicola_o_key)){
-      regunreg_mods = modify_mods(nicola_o_mods);
-    }
     if(is_nicola_o_key(nicola_o_key)){
         register_code(KC_SPC);
     }
-    if(is_nicola_o_key(nicola_o_key)){
-        unmodify_mods(regunreg_mods);
-    }
     nicola_o_pressed = true;
+    nicola_flush_pending_events();
 }
 
 void nicola_o_release(void) {
@@ -419,6 +402,7 @@ void nicola_o_release(void) {
     }
     nicola_o_pressed = false;
     nicola_o_key = KC_NO;
+    nicola_flush_pending_events();
 }
 
 void nicola_om_press(void) {
@@ -432,24 +416,30 @@ void nicola_om_press(void) {
         nicola_om_release();
     }
 
-    RUMods regunreg_mods = {0, 0};
-    if(is_nicola_m_key(nicola_m_key) && is_nicola_o_key(nicola_o_key)) {
-      uint8_t trig_mods = nicola_m_mods | nicola_o_mods;
-      if(is_nicola_eisu(nicola_m_key)) {
-        bool trig_shift = (trig_mods & MOD_BIT(KC_LSFT)) || (trig_mods & MOD_BIT(KC_RSFT));
-        bool cross_shift = is_cross_shift(nicola_m_key, nicola_o_key);
-        bool is_shift = (trig_shift || cross_shift) && !(trig_shift && cross_shift);
-        if(is_nicola && trig_shift) {
-          is_shift = !is_shift; // kana + shift tweak: requires same thumb shift experience as eisu typing
-        }
-        if(trig_shift && !is_shift) {
-            trig_mods = trig_mods & ~(MOD_BIT(KC_LSFT) | MOD_BIT(KC_RSFT));
-        } else if(!trig_shift && is_shift) {
-            trig_mods = trig_mods | MOD_BIT(KC_LSFT);
-        }
-      }
-      regunreg_mods = modify_mods(trig_mods);
+    uint8_t saved_mods = 0;
+    bool invert_pinky_shift = false;
+
+    if(is_nicola_eisu(nicola_m_key)) {
+        bool eisu_cross_shift = is_cross_shift(nicola_m_key, nicola_o_key);
+
+        // 英数モード: クロスシフトで Shift+1(=!) や Shift+F7 つまり invert_pinky_shift = eisu_cross_shift
+        // Nicolaモード: 英数キーがくるということはすでに小指Shiftが押されている。
+        //    同側シフトで小指シフトリリースイベント  クロスシフトでは何もしない    invert_pinky_shift = !eisu_cross_shift
+        invert_pinky_shift = (eisu_cross_shift != is_nicola);
     }
+
+    if(invert_pinky_shift) {
+        saved_mods = get_mods();
+        uint8_t new_mods = saved_mods;
+        uint8_t shift_bits = MOD_BIT(KC_LSFT) | MOD_BIT(KC_RSFT);
+        if (saved_mods & shift_bits) {
+            new_mods &= ~shift_bits;
+        } else {
+            new_mods |= MOD_BIT(KC_LSFT);
+        }
+        set_mods(new_mods);
+    }
+
     switch(nicola_m_key) {
         case NG_E_TAB   : register_code(KC_GRV); break;
 
@@ -570,10 +560,12 @@ void nicola_om_press(void) {
           case NG_SLSH: send_string("xo"); break;
         }
     }
-    if(is_nicola_m_key(nicola_m_key) && is_nicola_o_key(nicola_o_key)) {
-        unmodify_mods(regunreg_mods);
+
+    if(invert_pinky_shift) {
+        set_mods(saved_mods);
     }
     nicola_om_pressed = true;
+    nicola_flush_pending_events();
 }
 
 void nicola_om_release(void) {
@@ -634,13 +626,11 @@ void nicola_om_release(void) {
     nicola_om_pressed = false;
     nicola_m_key = KC_NO;
     nicola_o_key = KC_NO;
+    nicola_flush_pending_events();
 }
 
 // 親指シフトの入力処理
 bool process_nicola(uint16_t keycode, keyrecord_t *record) {
-  if(keycode >= KC_LCTL && keycode <= KC_RGUI) {
-    return true;
-  }
   key_process_guard = 1; // timeout entrance guard
   bool cont_process = true;
   // if (!is_nicola || n_modifier > 0) return true;
@@ -697,7 +687,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             break;
         }
         nicola_m_key = keycode;
-        nicola_m_mods = get_mods();
+        //nicola_m_mods = get_mods();
         nicola_m_time = curr_time;
         keypress_timer_start(TIMEOUT_THRESHOLD * 16);
         cont_process = false;
@@ -751,31 +741,22 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             break;
         }
         nicola_o_key = keycode;
-        nicola_o_mods = get_mods();
+        //nicola_o_mods = get_mods();
         nicola_o_time = curr_time;
         keypress_timer_start(TIMEOUT_THRESHOLD * 16);
         cont_process = false;
     } else {
         // その他のキーが押された
-        switch(nicola_int_state) {
-          case NICOLA_STATE_S1_INIT:
-            break;
-          case NICOLA_STATE_S2_M:
-            nicola_m_press();
-            break;
-          case NICOLA_STATE_S3_O:
-            nicola_o_press();
-            break;
-          case NICOLA_STATE_S4_MO:
-            nicola_om_press();
-            break;
-          case NICOLA_STATE_S5_OM:
-            nicola_om_press();
-            break;
+        if(nicola_int_state == NICOLA_STATE_S1_INIT) {
+            cont_process = true;
+        } else {
+            if(nicola_pending_count < NICOLA_MAX_PENDING_EVENTS) {
+                nicola_pending_events[nicola_pending_count].keycode = keycode;
+                nicola_pending_events[nicola_pending_count].pressed = record->event.pressed;
+                nicola_pending_count++;
+            }
+            cont_process = false;
         }
-        nicola_int_state = NICOLA_STATE_S1_INIT;
-        key_process_guard = 0;
-        // continue processing current key, so this path returns true
     }
   } else { // key release
     if(NG_TOP <= keycode && keycode <= NG_BOTTOM) { // key off
@@ -836,6 +817,18 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             break;
         }
         cont_process = false;
+    } else {
+        // その他のキーが離された
+        if(nicola_int_state == NICOLA_STATE_S1_INIT) {
+            cont_process = true;
+        } else {
+            if(nicola_pending_count < NICOLA_MAX_PENDING_EVENTS) {
+                nicola_pending_events[nicola_pending_count].keycode = keycode;
+                nicola_pending_events[nicola_pending_count].pressed = record->event.pressed;
+                nicola_pending_count++;
+            }
+            cont_process = false;
+        }
     }
   }
   key_process_guard = 0;
