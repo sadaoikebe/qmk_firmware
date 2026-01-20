@@ -121,8 +121,14 @@ typedef enum nicola_keycodes {
   NG_DOT,
   NG_SLSH,
 
-  NG_M_BOTTOM = NG_SLSH,
   NG_RIGHT_FINGER_BOTTOM = NG_SLSH,
+
+  NG_LEFT,
+  NG_DOWN,
+  NG_UP,
+  NG_RIGHT,
+
+  NG_M_BOTTOM = NG_RIGHT,
 
   NG_SHFTL,
   NG_SHFTR,
