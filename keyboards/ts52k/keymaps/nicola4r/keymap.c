@@ -69,21 +69,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case KC_EISU:
       if (record->event.pressed) {
-        // NICOLA親指シフト
-        send_string(SS_TAP(X_MHEN)); // Win
-        send_string(SS_TAP(X_LANG2)); // Mac
+        register_code(KC_MHEN); // Win
+        register_code(KC_LANG2); // Mac
         nicola_off();
-        // NICOLA親指シフト
+      } else {
+        unregister_code(KC_LANG2);
+        unregister_code(KC_MHEN);
       }
       return false;
       break;
     case KC_KANA2:
       if (record->event.pressed) {
-        // NICOLA親指シフト
-        send_string(SS_TAP(X_HENK)); // Win
-        send_string(SS_TAP(X_LANG1)); // Mac
+        register_code(KC_HENK); // Win
+        register_code(KC_LANG1); // Mac
         nicola_on();
-        // NICOLA親指シフト
+      } else {
+        unregister_code(KC_LANG1);
+        unregister_code(KC_HENK);
       }
       return false;
       break;
