@@ -115,7 +115,6 @@ bool nicola_state(void) {
 
 // バッファをクリアする
 void nicola_clear(void) {
-
     switch(nicola_int_state) {
         case NICOLA_STATE_S1_INIT:
             break;
@@ -126,20 +125,11 @@ void nicola_clear(void) {
             nicola_o_release();
             break;
         case NICOLA_STATE_S4_MO:
-            nicola_om_release();
-            break;
         case NICOLA_STATE_S5_OM:
             nicola_om_release();
             break;
     }
-
-  nicola_m_key = KC_NO;
-  nicola_o_key = KC_NO;
-  nicola_int_state = NICOLA_STATE_S1_INIT;
-  key_process_guard = 0;
-  nicola_m_pressed = false;
-  nicola_o_pressed = false;
-  nicola_om_pressed = false;
+    nicola_int_state = NICOLA_STATE_S1_INIT;
 }
 
 // 入力モードか編集モードかを確認する
@@ -832,8 +822,12 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
                 nicola_pending_events[nicola_pending_count].keycode = keycode;
                 nicola_pending_events[nicola_pending_count].pressed = record->event.pressed;
                 nicola_pending_count++;
+                cont_process = false;
+            } else {
+                // too many non-nicola keys pressed; fulshing buffer
+                nicola_clear();
+                cont_process = true;
             }
-            cont_process = false;
         }
     }
   } else { // key release
@@ -904,8 +898,12 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
                 nicola_pending_events[nicola_pending_count].keycode = keycode;
                 nicola_pending_events[nicola_pending_count].pressed = record->event.pressed;
                 nicola_pending_count++;
+                cont_process = false;
+            } else {
+                // too many non-nicola keys pressed; fulshing buffer
+                nicola_clear();
+                cont_process = true;
             }
-            cont_process = false;
         }
     }
   }
@@ -915,21 +913,6 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
 
 void keypress_timer_expired(void) {
     if(!key_process_guard) {
-        switch(nicola_int_state) {
-            case NICOLA_STATE_S1_INIT:
-                break;
-            case NICOLA_STATE_S2_M:
-                nicola_m_press();
-                break;
-            case NICOLA_STATE_S3_O:
-                nicola_o_press();
-                break;
-            case NICOLA_STATE_S4_MO:
-                nicola_om_press();
-                break;
-            case NICOLA_STATE_S5_OM:
-                nicola_om_press();
-                break;
-        }
+        nicola_clear();
     }
 }
