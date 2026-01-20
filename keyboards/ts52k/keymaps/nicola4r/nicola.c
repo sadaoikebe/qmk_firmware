@@ -131,6 +131,22 @@ void nicola_clear(void) {
     }
     nicola_int_state = NICOLA_STATE_S1_INIT;
 }
+void nicola_trigger(void) {
+    switch(nicola_int_state) {
+        case NICOLA_STATE_S1_INIT:
+            break;
+        case NICOLA_STATE_S2_M:
+            nicola_m_press();
+            break;
+        case NICOLA_STATE_S3_O:
+            nicola_o_press();
+            break;
+        case NICOLA_STATE_S4_MO:
+        case NICOLA_STATE_S5_OM:
+            nicola_om_press();
+            break;
+    }
+}
 
 // 入力モードか編集モードかを確認する
 void nicola_mode(uint16_t keycode, keyrecord_t *record) {
@@ -825,7 +841,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
                 cont_process = false;
             } else {
                 // too many non-nicola keys pressed; fulshing buffer
-                nicola_clear();
+                nicola_trigger();
                 cont_process = true;
             }
         }
@@ -901,7 +917,7 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
                 cont_process = false;
             } else {
                 // too many non-nicola keys pressed; fulshing buffer
-                nicola_clear();
+                nicola_trigger();
                 cont_process = true;
             }
         }
@@ -913,6 +929,6 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
 
 void keypress_timer_expired(void) {
     if(!key_process_guard) {
-        nicola_clear();
+        nicola_trigger();
     }
 }
