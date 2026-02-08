@@ -508,6 +508,16 @@ void nicola_om_press(void) {
         // Nicolaモード: 英数キーがくるということはすでに小指Shiftが押されている。
         //    同側シフトで小指シフトリリースイベント  クロスシフトでは何もしない    invert_pinky_shift = !eisu_cross_shift
         invert_pinky_shift = (eisu_cross_shift != is_nicola);
+
+        // cursor keys
+        switch(nicola_m_key) {
+        case NG_E_C:
+        case NG_E_V:
+        case NG_E_N:
+        case NG_E_M:
+            invert_pinky_shift = false;
+            break;
+        }
     } else {
         if(nicola_o_key == NG_SHFTL) {
             switch(nicola_m_key) {
@@ -561,8 +571,6 @@ void nicola_om_press(void) {
         case NG_E_SCLN: register_code(KC_0); break;
         case NG_E_QUOT: register_code(KC_BSPC);break;
 
-        case NG_E_N   : break;
-        case NG_E_M   : break;
         case NG_E_COMM: register_code(KC_LBRC);break;
         case NG_E_DOT : register_code(KC_RBRC);break;
         case NG_E_SLSH: register_code(KC_BSLS);break;
@@ -611,6 +619,11 @@ void nicola_om_press(void) {
           case NG_COMM: register_code(KC_P);register_code(KC_E); break; // "pe"
           case NG_DOT : register_code(KC_B);register_code(KC_O); break; // "bo"
           case NG_SLSH: register_code(KC_SLSH);                  break; // "?" invert_pinky_shift
+
+          case NG_E_C : register_code(KC_LEFT); break;
+          case NG_E_V : register_code(KC_DOWN); break;
+          case NG_E_N : register_code(KC_PGUP); break;
+          case NG_E_M : register_code(KC_END);  break;
         }
     } else if(nicola_o_key == NG_SHFTR) {
         switch(nicola_m_key) {
@@ -650,6 +663,11 @@ void nicola_om_press(void) {
           case NG_COMM: register_code(KC_M);register_code(KC_U); break; // "mu"
           case NG_DOT : register_code(KC_W);register_code(KC_A); break; // "wa"
           case NG_SLSH: register_code(KC_X);register_code(KC_O); break; // "xo"
+
+          case NG_E_C : register_code(KC_HOME);  break;
+          case NG_E_V : register_code(KC_PGDN);  break;
+          case NG_E_N : register_code(KC_UP);    break;
+          case NG_E_M : register_code(KC_RIGHT); break;
         }
     }
 
@@ -742,6 +760,11 @@ void nicola_om_release(void) {
           case NG_COMM: unregister_code(KC_P);unregister_code(KC_E); break; // "pe"
           case NG_DOT : unregister_code(KC_B);unregister_code(KC_O); break; // "bo"
           case NG_SLSH: unregister_code(KC_SLSH);                  break; // "?" invert_pinky_shift
+
+          case NG_E_C : unregister_code(KC_LEFT); break;
+          case NG_E_V : unregister_code(KC_DOWN); break;
+          case NG_E_N : unregister_code(KC_PGUP); break;
+          case NG_E_M : unregister_code(KC_END); break;
         }
     } else if(nicola_o_key == NG_SHFTR) {
         switch(nicola_m_key) {
@@ -781,6 +804,11 @@ void nicola_om_release(void) {
           case NG_COMM: unregister_code(KC_M);unregister_code(KC_U); break; // "mu"
           case NG_DOT : unregister_code(KC_W);unregister_code(KC_A); break; // "wa"
           case NG_SLSH: unregister_code(KC_X);unregister_code(KC_O); break; // "xo"
+
+          case NG_E_C : unregister_code(KC_HOME);  break;
+          case NG_E_V : unregister_code(KC_PGDN);  break;
+          case NG_E_N : unregister_code(KC_UP);    break;
+          case NG_E_M : unregister_code(KC_RIGHT); break;
         }
     }
     nicola_om_pressed = false;
