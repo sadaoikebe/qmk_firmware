@@ -40,10 +40,10 @@ enum custom_keycodes {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_QWERTY] = LAYOUT( \
-      NG_E_TAB,  NG_E_Q, NG_E_W, NG_E_E, NG_E_R, NG_E_T, NG_E_Y, NG_E_U, NG_E_I,  NG_E_O,    NG_E_P,    NG_E_LBRC,NG_E_RBRC, NG_E_BSLS, KC_ESC, \
-      KC_LCTL,   NG_E_A, NG_E_S, NG_E_D, NG_E_F, NG_E_G, NG_E_H, NG_E_J, NG_E_K,  NG_E_L,    NG_E_SCLN, NG_E_QUOT,           KC_ENT, MO(_FUNC), \
+      NG_E_TAB,  NG_E_Q, NG_E_W, NG_E_E, NG_E_R, NG_E_T, NG_E_Y, NG_E_U, NG_E_I,  NG_E_O,    NG_E_P,    NG_E_LBRC,NG_E_RBRC, NG_E_BSLS, KC_NO,  \
+      KC_LCTL,   NG_E_A, NG_E_S, NG_E_D, NG_E_F, NG_E_G, NG_E_H, NG_E_J, NG_E_K,  NG_E_L,    NG_E_SCLN, NG_E_QUOT,           KC_ENT,    KC_ESC, \
       KC_LSFT,           NG_E_Z, NG_E_X, NG_E_C, NG_E_V, NG_E_B, NG_E_N, NG_E_M,  NG_E_COMM, NG_E_DOT,  NG_E_SLSH,  KC_RSFT, NG_UP,             \
-      MO(_FUNC), KC_LGUI, KC_LALT,       NG_SHFTL,               NG_SHFTR,     KC_RALT, KC_RGUI, LT(_FUNC, KC_APP), NG_LEFT, NG_DOWN, NG_RIGHT ),
+      MO(_FUNC), KC_LGUI, KC_LALT,       NG_SHFTL,               NG_SHFTR,     KC_RALT, KC_RGUI,  KC_APP, NG_LEFT, NG_DOWN, NG_RIGHT ),
 
     [_NICOLA] = LAYOUT( \
       KC_TRNS, NG_Q,    NG_W,    NG_E,    NG_R,   NG_T,   NG_Y,    NG_U,   NG_I,     NG_O,    NG_P,    NG_LBRC,  NG_RBRC, NG_BSLS, KC_TRNS, \
@@ -102,17 +102,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 bool encoder_update_user(uint8_t index, bool clockwise) {
     if (index == 0) {
         if (clockwise) {
-            if(layer_state_is(_FUNC)) {
-                tap_code(KC_PGDN);
-            } else {
-                tap_code(KC_DOWN);
-            }
+            tap_code(KC_PGDN);
         } else {
-            if(layer_state_is(_FUNC)) {
-                tap_code(KC_PGUP);
-            } else {
-                tap_code(KC_UP);
-            }
+            tap_code(KC_PGUP);
         }
     }
     return true;
