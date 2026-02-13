@@ -515,7 +515,7 @@ void nicola_om_press(void) {
         case NG_E_V:
         case NG_E_N:
         case NG_E_M:
-            invert_pinky_shift = false;
+            invert_pinky_shift = is_nicola;
             break;
         }
     } else {
