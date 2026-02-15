@@ -35,8 +35,7 @@ typedef enum {
   NICOLA_STATE_S2_M,
   NICOLA_STATE_S3_O,
   NICOLA_STATE_S4_MO,
-  NICOLA_STATE_S5_OM,
-  NICOLA_STATE_S6_OO
+  NICOLA_STATE_S5_OM
 } nicola_state_t;
 
 static nicola_state_t nicola_int_state = NICOLA_STATE_S1_INIT;
@@ -47,11 +46,6 @@ static uint16_t nicola_o_time;
 static bool nicola_m_pressed;
 static bool nicola_o_pressed;
 static bool nicola_om_pressed;
-
-static int nicola_o2_key;
-static uint16_t nicola_o2_time;
-static bool nicola_o2_pressed;
-static bool nicola_oo_pressed;
 
 #define NICOLA_MAX_PENDING_EVENTS 8
 typedef struct {
@@ -79,14 +73,10 @@ void keypress_timer_expired(void);
 void nicola_m_press(void);
 void nicola_o_press(void);
 void nicola_om_press(void);
-void nicola_o2_press(void);
-void nicola_oo_press(void);
 
 void nicola_m_release(void);
 void nicola_o_release(void);
 void nicola_om_release(void);
-void nicola_o2_release(void);
-void nicola_oo_release(void);
 
 void nicola_release_guard(void);
 
@@ -140,9 +130,6 @@ void nicola_clear(void) {
         case NICOLA_STATE_S5_OM:
             nicola_om_release();
             break;
-        case NICOLA_STATE_S6_OO:
-            nicola_oo_release();
-            break;
     }
     nicola_int_state = NICOLA_STATE_S1_INIT;
 }
@@ -159,9 +146,6 @@ void nicola_trigger(void) {
         case NICOLA_STATE_S4_MO:
         case NICOLA_STATE_S5_OM:
             nicola_om_press();
-            break;
-        case NICOLA_STATE_S6_OO:
-            nicola_oo_press();
             break;
     }
 }
@@ -229,14 +213,8 @@ void nicola_release_guard(void) {
     if(nicola_o_pressed) {
         nicola_o_release();
     }
-    if(nicola_o2_pressed) {
-        nicola_o2_release();
-    }
     if(nicola_om_pressed) {
         nicola_om_release();
-    }
-    if(nicola_oo_pressed) {
-        nicola_oo_release();
     }
 }
 
@@ -421,9 +399,17 @@ void nicola_m_release(void) {
 
 void nicola_o_press(void) {
     nicola_release_guard();
-    if(is_nicola_o_key(nicola_o_key)){
+
+    if(nicola_o_key == NG_SHFTL) {
         register_code(KC_SPC);
+    } else if(nicola_o_key == NG_SHFTR) {
+        if(!is_nicola) {
+            register_code(KC_LANG1);
+        } else {
+            register_code(KC_SPC);
+        }
     }
+
     nicola_o_pressed = true;
     nicola_flush_pending_events();
 }
@@ -432,69 +418,28 @@ void nicola_o_release(void) {
     if(!nicola_o_pressed && is_nicola_o_key(nicola_o_key)) {
         nicola_o_press();
     }
-    if(nicola_o_key != 0) {
+
+    if(nicola_o_key == NG_SHFTL) {
         unregister_code(KC_SPC);
+    } else if(nicola_o_key == NG_SHFTR) {
+        if(!is_nicola) {
+            unregister_code(KC_LANG1);
+        } else {
+            unregister_code(KC_SPC);
+        }
     }
+
+    nicola_flush_pending_events();
+
+    if(nicola_o_key == NG_SHFTR) {
+        if(!is_nicola) {
+            is_nicola = true;
+            layer_on(nicola_layer);
+        }
+    }
+
     nicola_o_pressed = false;
     nicola_o_key = KC_NO;
-    nicola_flush_pending_events();
-}
-
-void nicola_o2_press(void) {
-    nicola_release_guard();
-    if(is_nicola_o_key(nicola_o2_key)){
-        register_code(KC_SPC);
-    }
-    nicola_o2_pressed = true;
-    nicola_flush_pending_events();
-}
-
-void nicola_o2_release(void) {
-    if(!nicola_o2_pressed && is_nicola_o_key(nicola_o2_key)) {
-        nicola_o2_press();
-    }
-    if(nicola_o2_key != 0) {
-        unregister_code(KC_SPC);
-    }
-    nicola_o2_pressed = false;
-    nicola_o2_key = KC_NO;
-    nicola_flush_pending_events();
-}
-
-void nicola_oo_press(void) {
-    nicola_release_guard();
-    if(nicola_o_key == NG_SHFTR && nicola_o2_key == NG_SHFTL) {
-        register_code(KC_HENK); // Win
-        register_code(KC_LANG1); // Mac
-        is_nicola = true;
-        layer_on(nicola_layer);
-    }
-    else if(nicola_o_key == NG_SHFTL && nicola_o2_key == NG_SHFTR) {
-        register_code(KC_MHEN); // Win
-        register_code(KC_LANG2); // Mac
-        is_nicola = false;
-        layer_off(nicola_layer);
-    }
-    nicola_oo_pressed = true;
-    nicola_flush_pending_events();
-}
-
-void nicola_oo_release(void) {
-    if(!nicola_oo_pressed && is_nicola_o_key(nicola_o_key) && is_nicola_o_key(nicola_o2_key)) {
-        nicola_oo_press();
-    }
-    if(nicola_o_key == NG_SHFTR && nicola_o2_key == NG_SHFTL) {
-        unregister_code(KC_LANG1); // Mac
-        unregister_code(KC_HENK); // Win
-    }
-    else if(nicola_o_key == NG_SHFTL && nicola_o2_key == NG_SHFTR) {
-        unregister_code(KC_LANG2); // Mac
-        unregister_code(KC_MHEN); // Win
-    }
-    nicola_oo_pressed = false;
-    nicola_o_key = KC_NO;
-    nicola_o2_key = KC_NO;
-    nicola_flush_pending_events();
 }
 
 void nicola_om_press(void) {
@@ -873,30 +818,6 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             nicola_om_release();
             nicola_int_state = NICOLA_STATE_S2_M;
             break;
-          case NICOLA_STATE_S6_OO:
-            // OOM
-            // timeout check
-            if(curr_time - nicola_o_time > TIMEOUT_THRESHOLD) {
-              // timeout => (output OO) => S2
-              nicola_oo_release();
-              nicola_int_state = NICOLA_STATE_S2_M;
-            } else {
-              // combo => three key judge
-              uint16_t t1 = nicola_o_time - nicola_o2_time;
-              uint16_t t2 = curr_time - nicola_o_time;
-              if(t1 < t2) {
-                // the O key in between is combo with the leading O key
-                // [OO]M
-                nicola_oo_release();
-                nicola_int_state = NICOLA_STATE_S2_M;
-              } else {
-                // the leading o key is single, the O key in between is combo with current key
-                // [O]OM
-                nicola_o2_release();
-                nicola_int_state = NICOLA_STATE_S5_OM;
-              }
-            }
-            break;
         }
         nicola_m_key = keycode;
         //nicola_m_mods = get_mods();
@@ -921,19 +842,8 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
               nicola_int_state = NICOLA_STATE_S4_MO;
             }
             break;
-          case NICOLA_STATE_S6_OO:
-                // just in case
-                nicola_o2_release();
           case NICOLA_STATE_S3_O:
-            // timeout check
-            if((curr_time - nicola_o_time <= TIMEOUT_THRESHOLD) && (nicola_o_key != keycode)) {
-                nicola_int_state = NICOLA_STATE_S6_OO;
-                nicola_o2_key = nicola_o_key;
-                nicola_o2_time = nicola_o_time;
-            } else {
-                // same behavior for time out and sequential stroke
-                nicola_o_release();
-            }
+            nicola_o_release();
             break;
           case NICOLA_STATE_S4_MO:
             // same behavior for time out and sequential stroke
@@ -1037,26 +947,6 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
             } else if(nicola_m_key == keycode) {
               // O ON --> M ON --> M OFF (both O and M are output)
               nicola_om_release();
-              nicola_int_state = NICOLA_STATE_S1_INIT;
-            }
-            break;
-          case NICOLA_STATE_S6_OO:
-            if(nicola_o2_key == keycode) {
-              // O2 ON --> O ON --> O2 OFF
-              uint16_t t1 = nicola_o_time - nicola_o2_time;
-              uint16_t t2 = curr_time - nicola_o_time;
-              if(t1>=t2 && t2 < OVERLAP_THRESHOLD) {
-                // O2 ON --> O ON --> O2 OFF (O2 is output, but O is still open to combo)
-                nicola_o2_release();
-                nicola_int_state = NICOLA_STATE_S3_O;
-              } else {
-                // O2 ON --> O ON --> O2 OFF (O/O2 combo is output)
-                nicola_oo_release();
-                nicola_int_state = NICOLA_STATE_S1_INIT;
-              }
-            } else if(nicola_o_key == keycode) {
-              // O2 ON --> O ON --> O OFF (O/O2 combo is output)
-              nicola_oo_release();
               nicola_int_state = NICOLA_STATE_S1_INIT;
             }
             break;

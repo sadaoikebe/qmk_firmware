@@ -35,15 +35,23 @@ enum keymap_layers {
 
 enum custom_keycodes {
   KC_EISU = NG_SAFE_RANGE,
-  KC_KANA2
+  KC_KANA2,
+  MY_M,
+  MY_H,
+  MY_E,
+  MY_S,
+  MY_D,
+  MY_X
 };
+
+bool ctrl_m_pressed;
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_QWERTY] = LAYOUT( \
-      NG_E_TAB,  NG_E_Q, NG_E_W, NG_E_E, NG_E_R, NG_E_T, NG_E_Y, NG_E_U, NG_E_I,  NG_E_O,    NG_E_P,    NG_E_LBRC,NG_E_RBRC, NG_E_BSLS, KC_NO,  \
-      KC_LCTL,   NG_E_A, NG_E_S, NG_E_D, NG_E_F, NG_E_G, NG_E_H, NG_E_J, NG_E_K,  NG_E_L,    NG_E_SCLN, NG_E_QUOT,           KC_ENT,    KC_ESC, \
-      KC_LSFT,           NG_E_Z, NG_E_X, NG_E_C, NG_E_V, NG_E_B, NG_E_N, NG_E_M,  NG_E_COMM, NG_E_DOT,  NG_E_SLSH,  KC_RSFT, NG_UP,             \
-      MO(_FUNC), KC_LGUI, KC_LALT,       NG_SHFTL,               NG_SHFTR,     KC_RALT, KC_RGUI,  KC_APP, NG_LEFT, NG_DOWN, NG_RIGHT ),
+      NG_E_TAB,  NG_E_Q, NG_E_W, MY_E,   NG_E_R, NG_E_T, NG_E_Y, NG_E_U, NG_E_I,  NG_E_O,    NG_E_P,    NG_E_LBRC,NG_E_RBRC, NG_E_BSLS, KC_NO,  \
+      KC_LCTL,   NG_E_A, MY_S,   MY_D,   NG_E_F, NG_E_G, MY_H,   NG_E_J, NG_E_K,  NG_E_L,    NG_E_SCLN, NG_E_QUOT,           KC_ENT,    KC_ESC, \
+      KC_LSFT,           NG_E_Z, MY_X,   NG_E_C, NG_E_V, NG_E_B, NG_E_N, MY_M,    NG_E_COMM, NG_E_DOT,  NG_E_SLSH,  KC_RSFT, NG_UP,             \
+       KC_EISU, KC_LGUI, KC_LALT,       NG_SHFTL,               NG_SHFTR,     MO(_FUNC), KC_RGUI,  KC_APP, NG_LEFT, NG_DOWN, NG_RIGHT ),
 
     [_NICOLA] = LAYOUT( \
       KC_TRNS, NG_Q,    NG_W,    NG_E,    NG_R,   NG_T,   NG_Y,    NG_U,   NG_I,     NG_O,    NG_P,    NG_LBRC,  NG_RBRC, NG_BSLS, KC_TRNS, \
@@ -55,7 +63,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       KC_ESC,  KC_TRNS, KC_TRNS, KC_TRNS,   KC_TRNS, KC_TRNS, KC_HOME, KC_PGDN, KC_PGUP,  KC_END,   KC_PSCR, KC_TRNS, KC_BRK,  KC_DEL,  KC_TRNS, \
       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,   KC_TRNS, KC_TRNS, KC_LEFT, KC_DOWN, KC_UP,    KC_RIGHT, KC_INS,  KC_DEL,           KC_TRNS, KC_TRNS, \
       KC_TRNS,          KC_TRNS, KC_TRNS,   KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,  KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, \
-      KC_TRNS, KC_TRNS, KC_TRNS,     KC_EISU,                      KC_KANA2,       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS )
+      KC_TRNS, KC_TRNS, KC_TRNS,     KC_TRNS,                      KC_TRNS,       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS )
 };
 
 void matrix_init_user(void) {
@@ -65,33 +73,59 @@ void matrix_init_user(void) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-
+  bool a = true;
   switch (keycode) {
     case KC_EISU:
       if (record->event.pressed) {
-        register_code(KC_MHEN); // Win
         register_code(KC_LANG2); // Mac
         nicola_off();
       } else {
         unregister_code(KC_LANG2);
-        unregister_code(KC_MHEN);
       }
-      return false;
+      a = false;
       break;
-    case KC_KANA2:
-      if (record->event.pressed) {
-        register_code(KC_HENK); // Win
-        register_code(KC_LANG1); // Mac
-        nicola_on();
-      } else {
-        unregister_code(KC_LANG1);
-        unregister_code(KC_HENK);
+    case MY_M:
+      {
+        uint16_t c = nicola_state() ? NG_M : NG_E_M;
+        if (record->event.pressed) {
+            uint8_t m = get_mods();
+
+            uint16_t mr = KC_NO;
+            if((m & MOD_BIT(KC_LCTRL)) && !ctrl_m_pressed) {
+                mr = KC_LCTRL;
+            } else if((m & MOD_BIT(KC_RCTRL)) && !ctrl_m_pressed) {
+                mr = KC_RCTRL;
+            }
+
+            if(mr != KC_NO && !ctrl_m_pressed) {
+                keyrecord_t r;
+                r.tap.count = 0;
+                r.event.pressed = false;
+                process_nicola(mr, &r);
+
+                keyrecord_t x;
+                 x.event.pressed = true;
+                x.tap.count = 0;
+
+                a = process_nicola(x.keycode, x);
+
+                r.event.pressed = true;
+                process_nicola(r.keycode, r);
+            } else {
+                a = process_nicola(c, record);
+            }
+            ctrl_m_pressed = true;
+        } else {
+            a = process_nicola(c, record);
+        }
+        a = false;
       }
-      return false;
       break;
+
   }
 
-  bool a = true;
+  if (a == false) return false;
+
   nicola_mode(keycode, record);
   a = process_nicola(keycode, record);
   if (a == false) return false;
