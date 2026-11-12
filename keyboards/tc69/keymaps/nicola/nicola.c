@@ -45,6 +45,9 @@ static uint16_t nicola_o_time;
 
 static int key_process_guard = 0;
 void keypress_timer_expired(void);
+void nicola_m_type(void);
+void nicola_o_type(void);
+void nicola_om_type(void);
 
 // 親指シフトのレイヤー、シフトキーを設定
 void set_nicola(uint8_t layer) {
@@ -52,18 +55,27 @@ void set_nicola(uint8_t layer) {
 }
 
 // 親指シフトをオンオフ
+// 保留中の打鍵は切替前に旧モードのまま確定する（nicola_clear）。
+// ホストへの切替コードは keymap 側でこの後に送る。
 void nicola_on(void) {
-  is_nicola = true;
   nicola_clear();
-  layer_on(nicola_layer);
+  // 英数モード中の modifier の押下・解放は数えていないので、ここで実際の状態から数え直す。
+  // modifier が押されたままなら NICOLA レイヤーは外したままにする（離した時点で戻る）。
+  n_modifier = bitpop(get_mods());
+  is_nicola = true;
+  if (n_modifier == 0) {
+    layer_on(nicola_layer);
+  } else {
+    layer_off(nicola_layer);
+  }
 
 //   tap_code(KC_LANG1); // Mac
 //   tap_code(KC_HENK); // Win
 }
 
 void nicola_off(void) {
-  is_nicola = false;
   nicola_clear();
+  is_nicola = false;
   layer_off(nicola_layer);
 
 //   tap_code(KC_LANG2); // Mac
@@ -75,8 +87,26 @@ bool nicola_state(void) {
   return is_nicola;
 }
 
-// バッファをクリアする
+// 保留中の打鍵を確定して初期状態に戻す。
+// 2020年版は保留を捨てていたが、モード切替の直前に保留していた文字が消えるため、
+// 「その他のキーが押された」ときと同じ規則で確定出力してから戻す
+// （S2_M は単独、S3_O は単独、S4_MO / S5_OM は同時打鍵として確定）。
+// 呼び出し元は nicola_on / nicola_off と、process_nicola の「その他のキー」分岐。
 void nicola_clear(void) {
+  switch(nicola_int_state) {
+    case NICOLA_STATE_S1_INIT:
+      break;
+    case NICOLA_STATE_S2_M:
+      nicola_m_type();
+      break;
+    case NICOLA_STATE_S3_O:
+      nicola_o_type();
+      break;
+    case NICOLA_STATE_S4_MO:
+    case NICOLA_STATE_S5_OM:
+      nicola_om_type();
+      break;
+  }
   nicola_int_state = NICOLA_STATE_S1_INIT;
   key_process_guard = 0;
 }
@@ -100,7 +130,8 @@ void nicola_mode(uint16_t keycode, keyrecord_t *record) {
           layer_off(nicola_layer);
         }
         n_modifier++;
-      } else {
+      } else if (n_modifier > 0) {
+        // 数えていない押下に対応する解放で 0 から 255 へ回り込まないよう、0 では減らさない
         n_modifier--;
         if (n_modifier == 0) {
           layer_on(nicola_layer);
@@ -286,7 +317,10 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
   key_process_guard = 1; // timeout entrance guard
   bool cont_process = true;
   // if (!is_nicola || n_modifier > 0) return true;
-  uint16_t curr_time = timer_read();
+  // 打鍵の時刻はイベントの時刻を使う。LT() の判定待ちで QMK が溜めたイベントは
+  // 判定後にまとめて再生されるため、処理時点の timer_read() では間隔が潰れる。
+  // 通常の経路ではイベント生成直後に処理されるので、timer_read() とほぼ同じ値。
+  uint16_t curr_time = record->event.time;
 
   if (record->event.pressed) {
     if(NG_M_TOP <= keycode && keycode <= NG_M_BOTTOM) {
@@ -394,25 +428,8 @@ bool process_nicola(uint16_t keycode, keyrecord_t *record) {
         nicola_o_time = curr_time;
         cont_process = false;
     } else {
-        // その他のキーが押された
-        switch(nicola_int_state) {
-          case NICOLA_STATE_S1_INIT:
-            break;
-          case NICOLA_STATE_S2_M:
-            nicola_m_type();
-            break;
-          case NICOLA_STATE_S3_O:
-            nicola_o_type();
-            break;
-          case NICOLA_STATE_S4_MO:
-            nicola_om_type();
-            break;
-          case NICOLA_STATE_S5_OM:
-            nicola_om_type();
-            break;
-        }
-        nicola_int_state = NICOLA_STATE_S1_INIT;
-        key_process_guard = 0;
+        // その他のキーが押された: 保留を確定してから、このキーを QMK に渡す
+        nicola_clear();
         // continue processing current key, so this path returns true
     }
   } else { // key release
