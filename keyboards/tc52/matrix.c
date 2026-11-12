@@ -8,8 +8,7 @@
  * The sensing and judgement logic is TC69's, unchanged:
  *   - per crossing: PURGE output LOW -> wait_us(20) -> PURGE input (Hi-Z) -> row HIGH ->
  *     wait_us(1) -> analogReadPin(SENSE) -> row LOW. Column address outside, rows inside.
- *   - columns are visited in TC69's address order (MUX A X0..X7, then MUX B X0..X7) and the
- *     address pins are written in TC69's order (S1, S2, S3, S0).
+ *   - columns are visited in TC69's address order (MUX A X0..X7, then MUX B X0..X7).
  *   - every crossing of the matrix is read, including the 4 crossings without an electrode.
  *   - thresholds 120/30 per sample (x3 frames); the home key (TC69's A key) 220/80.
  *   - start-up calibration: 3 frames discarded, sum of the next 3 frames = baseline.
@@ -18,9 +17,16 @@
  *     scan, so the release threshold branch never has an effect. The effective behaviour is
  *     a single threshold (press threshold) on a 3-frame moving sum. This is how TC69 ran.
  *
- * What differs from TC69 (board only): pins (design-spec.md §6.1), 14 columns x 4 rows with a
- * column -> MUX input table (tc52_matrix.h, generated), home key position, and one extra
- * matrix row (row 4) carrying the encoder push switch, which is a plain GPIO on TC52.
+ * What differs from TC69 (board only): pins (the routed TC52 board, tc52-build-log.md
+ * "GPIO の割り当て（確定）"; design-spec.md §6.1 is outdated there), 14 columns x 4 rows with a
+ * column -> MUX input table (tc52_matrix.h, generated), MUX selection, home key position,
+ * and one extra matrix row (row 4) carrying the encoder push switch, a plain GPIO on TC52.
+ *
+ * MUX selection (TC52 board): unlike TC69 (shared S0..S3 + an inverter between the two INH),
+ * each 4051 has its own S1..S3 and its own INH. A column is selected by
+ *   other MUX's INH HIGH -> S1, S2, S3 of the selected MUX -> selected MUX's INH LOW
+ * so both INH are never LOW at the same time (break before make). The unselected MUX's
+ * S1..S3 are left as they are.
  * Optional raw-ADC diagnostics are compiled in only with TC52_ADC_DIAG (default OFF).
  */
 #include QMK_KEYBOARD_H
@@ -37,14 +43,18 @@
 _Static_assert(MATRIX_COLS == 14, "TC52 senses 14 columns via 2x 4051");
 _Static_assert(MATRIX_ROWS == CAP_ROWS + 1, "4 strobe rows + 1 direct-GPIO row (encoder switch)");
 
-/* design-spec.md §6.1 */
-const pin_t CAP_ROW_PINS[] = { GP18, GP19, GP20, GP21 };   /* ROW1..ROW4 */
-/* TC69 order: S1, S2, S3 (MUX input X bit0..2), then S0 (MUX select) */
-const pin_t CAP_COL_PINS[] = { GP23, GP24, GP25, GP22 };
-#define CAP_PURGE GP26
-#define CAP_SENSE GP28 /* ADC2 = op-amp output */
-#define TIE_LOW_1 GP27 /* unused, driven LOW to keep PURGE / ADC neighbours quiet */
-#define TIE_LOW_2 GP29
+/* Board pins: ~/workspace/tc52 pcb/ts52k.kicad_pcb, U5 (RP2040) pad nets. */
+const pin_t CAP_ROW_PINS[] = { GP21, GP20, GP19, GP18 };   /* ROW1..ROW4 (via R31..R34) */
+/* per MUX: S1, S2, S3 (= 4051 A, B, C = MUX input X bit0..2) */
+const pin_t CAP_SEL_PINS[2][3] = {
+    { GP10, GP9, GP8 },   /* MUX A (U7) */
+    { GP5,  GP4, GP3 },   /* MUX B (U8) */
+};
+const pin_t CAP_INH_PINS[2] = { GP11, GP7 };   /* INHA, INHB: LOW = MUX enabled */
+#define CAP_PURGE GP28 /* on the SENSE node */
+#define CAP_SENSE GP26 /* ADC0 = op-amp output */
+/* unconnected on the board, driven LOW (GP27 / GP29 sit next to SENSE / ADC) */
+const pin_t TIE_LOW_PINS[] = { GP6, GP22, GP23, GP24, GP25, GP27, GP29 };
 #define ENC_SW_PIN GP2 /* encoder push switch to GND, internal pull-up */
 
 static const uint8_t col_x[CAP_COLS]     = TC52_COL_X;
@@ -76,13 +86,20 @@ bool is_home_position(int i, int j) {
   return (i == TC52_HOME_COL) && (j == TC52_HOME_ROW);
 }
 
+/* Select logical column j: break before make (see the header comment). */
+static void select_column(int j) {
+    int m = col_mux_b[j] ? 1 : 0;
+    gpio_write_pin_high(CAP_INH_PINS[1 - m]);
+    gpio_write_pin(CAP_SEL_PINS[m][0], (col_x[j]&1) ? true : false);
+    gpio_write_pin(CAP_SEL_PINS[m][1], (col_x[j]&2) ? true : false);
+    gpio_write_pin(CAP_SEL_PINS[m][2], (col_x[j]&4) ? true : false);
+    gpio_write_pin_low(CAP_INH_PINS[m]);
+}
+
 void acquire_adc(int adc_measured_val[][CAP_ROWS]) {
   for(int s=0; s<CAP_COLS; ++s) {
     int j = scan_order[s];
-    gpio_write_pin(CAP_COL_PINS[0], (col_x[j]&1) ? true : false);
-    gpio_write_pin(CAP_COL_PINS[1], (col_x[j]&2) ? true : false);
-    gpio_write_pin(CAP_COL_PINS[2], (col_x[j]&4) ? true : false);
-    gpio_write_pin(CAP_COL_PINS[3], col_mux_b[j] ? true : false);
+    select_column(j);
     for(int i=0; i<CAP_ROWS; ++i) {
        gpio_set_pin_output(CAP_PURGE);
        gpio_write_pin_low(CAP_PURGE);
@@ -103,21 +120,27 @@ static void adc_diag_after_scan(void);
 #endif
 
 void matrix_init(void) {
-   gpio_set_pin_output(GP18);
-   gpio_set_pin_output(GP19);
-   gpio_set_pin_output(GP20);
-   gpio_set_pin_output(GP21);
-   gpio_set_pin_output(GP23);
-   gpio_set_pin_output(GP24);
-   gpio_set_pin_output(GP25);
-   gpio_set_pin_output(GP22);
+   for(int i=0; i<CAP_ROWS; ++i) {
+     gpio_set_pin_output(CAP_ROW_PINS[i]);
+   }
+   for(int m=0; m<2; ++m) {
+     for(int b=0; b<3; ++b) {
+       gpio_set_pin_output(CAP_SEL_PINS[m][b]);
+     }
+   }
+   /* both MUXes disabled until the first column is selected (level set before the
+    * pin becomes an output, so neither INH glitches LOW) */
+   for(int m=0; m<2; ++m) {
+     gpio_write_pin_high(CAP_INH_PINS[m]);
+     gpio_set_pin_output(CAP_INH_PINS[m]);
+   }
    gpio_set_pin_input(CAP_PURGE);
    gpio_set_pin_input(CAP_SENSE);
-   /* TC52 board additions (design-spec.md §6.1): not part of the sensing path */
-   gpio_set_pin_output(TIE_LOW_1);
-   gpio_write_pin_low(TIE_LOW_1);
-   gpio_set_pin_output(TIE_LOW_2);
-   gpio_write_pin_low(TIE_LOW_2);
+   /* TC52 board additions: not part of the sensing path */
+   for(unsigned i=0; i<sizeof(TIE_LOW_PINS)/sizeof(TIE_LOW_PINS[0]); ++i) {
+     gpio_set_pin_output(TIE_LOW_PINS[i]);
+     gpio_write_pin_low(TIE_LOW_PINS[i]);
+   }
    gpio_set_pin_input_high(ENC_SW_PIN);
 
   int adc_measured_val[CAP_COLS][CAP_ROWS];

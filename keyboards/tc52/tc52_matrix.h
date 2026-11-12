@@ -8,9 +8,9 @@
 //   c1  : MX2   MX3   MX4   MX5    A/X4
 //   c2  : MX7   MX8   MX13  MX9    A/X6
 //   c3  : MX11  MX12  MX18  MX14   A/X7
-//   c4  : MX16  MX17  MX22  MX23   A/X5
-//   c5  : MX20  MX21  MX27  --     A/X3
-//   c6  : MX25  MX26  MX31  --     A/X0
+//   c4  : MX16  MX17  MX22  MX23   A/X0
+//   c5  : MX20  MX21  MX27  --     A/X1
+//   c6  : MX25  MX26  MX31  --     A/X2
 //   c7  : MX29  MX30  MX35  MX60   B/X4
 //   c8  : MX33  MX34  MX39  --     B/X6
 //   c9  : MX37  MX38  MX44  MX81   B/X7
@@ -20,11 +20,12 @@
 //   c13 : MX55  MX65  MX66  MX67   B/X1
 //   c14 : MX64  MX74  --    MX71   B/X2
 
-// MUX input X (S1=bit0, S2=bit1, S3=bit2) and MUX select S0 (0 = MUX A, 1 = MUX B) per column.
-#define TC52_COL_X      { 4, 6, 7, 5, 3, 0, 4, 6, 7, 5, 3, 0, 1, 2 }
+// MUX input X (S1=bit0, S2=bit1, S3=bit2 of that MUX) and which MUX (0 = A, 1 = B) per column.
+// Each MUX has its own S1..S3 and INH (board pins in matrix.c); only the selected MUX's INH is LOW.
+#define TC52_COL_X      { 4, 6, 7, 0, 1, 2, 4, 6, 7, 5, 3, 0, 1, 2 }
 #define TC52_COL_MUX_B  { 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 }
 // Scan order = TC69 address order (MUX A X0..X7, then MUX B X0..X7), unused inputs skipped.
-#define TC52_SCAN_ORDER { 5, 4, 0, 3, 1, 2, 11, 12, 13, 10, 6, 9, 7, 8 }
+#define TC52_SCAN_ORDER { 3, 4, 5, 0, 1, 2, 11, 12, 13, 10, 6, 9, 7, 8 }
 
 // Empty crossings (no electrode); scanned like any other crossing, as TC69 did.
 #define TC52_EMPTY_CROSSINGS "r3c4 r3c5 r3c7 r2c13"
