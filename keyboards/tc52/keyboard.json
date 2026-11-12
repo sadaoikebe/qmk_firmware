@@ -1,0 +1,101 @@
+{
+    "keyboard_name": "TC52",
+    "manufacturer": "IkebeSadao",
+    "maintainer": "sadaoikebe",
+    "url": "https://github.com/sadaoikebe/ts52k",
+    "usb": {
+        "vid": "0xFEED",
+        "pid": "0x1952",
+        "device_version": "0.0.1"
+    },
+    "processor": "RP2040",
+    "bootloader": "rp2040",
+    "matrix_size": {
+        "cols": 14,
+        "rows": 5
+    },
+    "features": {
+        "bootmagic": false,
+        "nkro": true,
+        "encoder": true,
+        "mousekey": false,
+        "extrakey": false
+    },
+    "qmk": {
+        "locking": {
+            "enabled": true,
+            "resync": true
+        }
+    },
+    "encoder": {
+        "rotary": [
+            {
+                "pin_a": "GP0",
+                "pin_b": "GP1",
+                "resolution": 4
+            }
+        ]
+    },
+    "layouts": {
+        "LAYOUT": {
+            "layout": [
+                {"label": "MX2", "matrix": [0, 0], "x": 0, "y": 0},
+                {"label": "MX7", "matrix": [0, 1], "x": 1, "y": 0},
+                {"label": "MX11", "matrix": [0, 2], "x": 2, "y": 0},
+                {"label": "MX16", "matrix": [0, 3], "x": 3, "y": 0},
+                {"label": "MX20", "matrix": [0, 4], "x": 4, "y": 0},
+                {"label": "MX25", "matrix": [0, 5], "x": 5, "y": 0},
+                {"label": "MX29", "matrix": [0, 6], "x": 6, "y": 0},
+                {"label": "MX33", "matrix": [0, 7], "x": 7, "y": 0},
+                {"label": "MX37", "matrix": [0, 8], "x": 8, "y": 0},
+                {"label": "MX42", "matrix": [0, 9], "x": 9, "y": 0},
+                {"label": "MX46", "matrix": [0, 10], "x": 10, "y": 0},
+                {"label": "MX51", "matrix": [0, 11], "x": 11, "y": 0},
+                {"label": "MX55", "matrix": [0, 12], "x": 12, "y": 0},
+                {"label": "MX64", "matrix": [0, 13], "x": 13, "y": 0},
+                {"label": "SW2", "matrix": [4, 0], "x": 14, "y": 0},
+
+                {"label": "MX3", "matrix": [1, 0], "x": 0, "y": 1},
+                {"label": "MX8", "matrix": [1, 1], "x": 1, "y": 1},
+                {"label": "MX12", "matrix": [1, 2], "x": 2, "y": 1},
+                {"label": "MX17", "matrix": [1, 3], "x": 3, "y": 1},
+                {"label": "MX21", "matrix": [1, 4], "x": 4, "y": 1},
+                {"label": "MX26", "matrix": [1, 5], "x": 5, "y": 1},
+                {"label": "MX30", "matrix": [1, 6], "x": 6, "y": 1},
+                {"label": "MX34", "matrix": [1, 7], "x": 7, "y": 1},
+                {"label": "MX38", "matrix": [1, 8], "x": 8, "y": 1},
+                {"label": "MX43", "matrix": [1, 9], "x": 9, "y": 1},
+                {"label": "MX47", "matrix": [1, 10], "x": 10, "y": 1},
+                {"label": "MX56", "matrix": [1, 11], "x": 11, "y": 1},
+                {"label": "MX65", "matrix": [1, 12], "x": 12, "y": 1, "w": 2},
+                {"label": "MX74", "matrix": [1, 13], "x": 14, "y": 1},
+
+                {"label": "MX4", "matrix": [2, 0], "x": 0, "y": 2, "w": 2},
+                {"label": "MX13", "matrix": [2, 1], "x": 2, "y": 2},
+                {"label": "MX18", "matrix": [2, 2], "x": 3, "y": 2},
+                {"label": "MX22", "matrix": [2, 3], "x": 4, "y": 2},
+                {"label": "MX27", "matrix": [2, 4], "x": 5, "y": 2},
+                {"label": "MX31", "matrix": [2, 5], "x": 6, "y": 2},
+                {"label": "MX35", "matrix": [2, 6], "x": 7, "y": 2},
+                {"label": "MX39", "matrix": [2, 7], "x": 8, "y": 2},
+                {"label": "MX44", "matrix": [2, 8], "x": 9, "y": 2},
+                {"label": "MX48", "matrix": [2, 9], "x": 10, "y": 2},
+                {"label": "MX52", "matrix": [2, 10], "x": 11, "y": 2},
+                {"label": "MX75", "matrix": [2, 11], "x": 12, "y": 2, "w": 2},
+                {"label": "MX66", "matrix": [2, 12], "x": 14, "y": 2},
+
+                {"label": "MX5", "matrix": [3, 0], "x": 0, "y": 3, "w": 1.25},
+                {"label": "MX9", "matrix": [3, 1], "x": 1.25, "y": 3, "w": 1.25},
+                {"label": "MX14", "matrix": [3, 2], "x": 2.5, "y": 3, "w": 1.25},
+                {"label": "MX23", "matrix": [3, 3], "x": 3.75, "y": 3, "w": 2.25},
+                {"label": "MX60", "matrix": [3, 6], "x": 6, "y": 3, "w": 2.25},
+                {"label": "MX81", "matrix": [3, 8], "x": 8.25, "y": 3, "w": 1.25},
+                {"label": "MX82", "matrix": [3, 9], "x": 9.5, "y": 3, "w": 1.25},
+                {"label": "MX58", "matrix": [3, 10], "x": 10.75, "y": 3},
+                {"label": "MX61", "matrix": [3, 11], "x": 11.75, "y": 3},
+                {"label": "MX67", "matrix": [3, 12], "x": 12.75, "y": 3},
+                {"label": "MX71", "matrix": [3, 13], "x": 13.75, "y": 3}
+            ]
+        }
+    }
+}
