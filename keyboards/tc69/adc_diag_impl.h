@@ -44,11 +44,14 @@
  * Transition trace (auto-triggered): the first key whose judged state goes
  * 0->1 while nothing else is pressed becomes the target (or the fixed key from
  * TC69_DIAG_TRACE_KEY_ROW/COL). Two segments are captured around its press
- * edge (seg=P) and release edge (seg=R): TC69_DIAG_TRACE_PRE frames before the
- * edge and TC69_DIAG_TRACE_POST frames from the edge on, at scan resolution
- * (every TC69_DIAG_TRACE_DECIM-th scan). Both segments are dumped after the
- * release segment is complete:
- *   #TRC begin id=<n> seg=<P|R> key=r<row>c<col> cal=<cal> cal3=<cal sum> thr3=<press thr x3> rel3=<release thr x3> pre=<n> post=<n> decim=<n> other=<n> t0_us=<edge time, us clock>
+ * edge (seg=P) and release edge (seg=R): up to TC69_DIAG_TRACE_PRE - 1 frames
+ * before the edge and TC69_DIAG_TRACE_POST frames from the edge on, at scan
+ * resolution (every TC69_DIAG_TRACE_DECIM-th scan). A release segment that ends
+ * with the key judged pressed again (chatter, or a new stroke) is discarded and
+ * restarted at the next release edge (counted in r_restarts). Both segments are
+ * dumped after the release segment is complete and the key's 3-frame delta is
+ * back below 3 x TC69_DIAG_ENV_TH (at most 3 s later):
+ *   #TRC begin id=<n> seg=<P|R> key=r<row>c<col> cal=<cal> cal3=<cal sum> thr3=<press thr x3> rel3=<release thr x3> pre=<n> post=<n> decim=<n> other=<n> r_restarts=<n> t0_us=<edge time, us clock>
  *   T <seg> <i> <dt_us> <raw> <d3> <prs>[ <16 x raw of the target's row>]
  *   #TRC end id=<n> seg=<P|R>
  *   i = frame index relative to the edge frame (i=0 is the first frame judged
@@ -73,7 +76,7 @@
 #    define TC69_DIAG_ENV_MAX_KEYS 12
 #endif
 #ifndef TC69_DIAG_TRACE_PRE
-#    define TC69_DIAG_TRACE_PRE 200
+#    define TC69_DIAG_TRACE_PRE 300
 #endif
 #ifndef TC69_DIAG_TRACE_POST
 #    define TC69_DIAG_TRACE_POST 300
@@ -181,6 +184,8 @@ static uint32_t     trc_decim_ctr;
 static diag_seg_t   seg_p, seg_r;
 static int8_t       trc_c = -1, trc_r = -1;
 static uint32_t     trc_id;
+static uint16_t     trc_r_restarts; /* release segments discarded because the key was pressed again */
+static uint32_t     trc_done_ms;    /* when both segments were complete; the dump waits for the key to settle */
 
 static void adc_diag_reset_minmax(void) {
     for (int c = 0; c < MATRIX_COLS; ++c) {
@@ -380,8 +385,8 @@ static void seg_dump(diag_seg_t *s, char name) {
     int      c = trc_c, r = trc_r;
     bool     a = is_home_position(c, r);
     uint32_t t0 = s->pt[TC69_DIAG_TRACE_PRE].t;
-    uprintf("#TRC begin id=%lu seg=%c key=r%dc%d cal=%d cal3=%d thr3=%d rel3=%d pre=%d post=%d decim=%d other=%d t0_us=%lu\n", (unsigned long)trc_id, name, r, c, calibration_val[c][r] / ADC_RING_BUFFER_SIZE, calibration_val[c][r], a ? adc_press_threshold_2 : adc_press_threshold, a ? adc_release_threshold_2 : adc_release_threshold,
-            s->npre, s->npost, TC69_DIAG_TRACE_DECIM, s->other, (unsigned long)t0);
+    uprintf("#TRC begin id=%lu seg=%c key=r%dc%d cal=%d cal3=%d thr3=%d rel3=%d pre=%d post=%d decim=%d other=%d r_restarts=%u t0_us=%lu\n", (unsigned long)trc_id, name, r, c, calibration_val[c][r] / ADC_RING_BUFFER_SIZE, calibration_val[c][r], a ? adc_press_threshold_2 : adc_press_threshold, a ? adc_release_threshold_2 : adc_release_threshold,
+            s->npre, s->npost, TC69_DIAG_TRACE_DECIM, s->other, (unsigned)trc_r_restarts, (unsigned long)t0);
     for (int i = TC69_DIAG_TRACE_PRE - s->npre; i < TC69_DIAG_TRACE_PRE + s->npost; ++i) {
         diag_tpoint_t *p = &s->pt[i];
         uprintf("T %c %d %ld %d %d %d", name, i - TC69_DIAG_TRACE_PRE, (long)(int32_t)(p->t - t0), p->raw, p->d3, p->prs);
@@ -451,12 +456,23 @@ static void diag_trace_after_scan(int last) {
             seg_add(&seg_r, f);
         } else {
             seg_add(&seg_r, f);
+            if (seg_r.done && now) {
+                /* pressed again (chatter or a new stroke) before the release segment ended:
+                 * not the final release; record the next release edge instead */
+                seg_r.done = false;
+                ++trc_r_restarts;
+            }
         }
-        if (seg_p.done && seg_r.done) {
+        if (seg_p.done && seg_r.done && trc_done_ms == 0) trc_done_ms = timer_read32() | 1;
+        /* dump once the key is back near its baseline (so a slow release is not cut by
+         * the ~1 s of console output), at the latest 3 s after both segments were complete */
+        if (seg_p.done && seg_r.done && (diag_d3(trc_c, trc_r) < 3 * TC69_DIAG_ENV_TH || TIMER_DIFF_32(timer_read32(), trc_done_ms) > 3000)) {
+            trc_done_ms = 0;
             seg_dump(&seg_p, 'P');
             seg_dump(&seg_r, 'R');
             diag_printed = true;
             ++trc_id;
+            trc_r_restarts = 0;
             trc_c = trc_r = -1;
             seg_p.done = seg_r.done = false;
         }
