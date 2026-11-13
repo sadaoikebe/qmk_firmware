@@ -10,6 +10,8 @@
  *   - hard-coded 16 / 5 replaced by MATRIX_COLS / MATRIX_ROWS (static-asserted to 16 / 5)
  *   - pin arrays typed pin_t instead of int
  *   - optional raw-ADC diagnostics, compiled in only with TC69_ADC_DIAG (default OFF)
+ *     (M1 toolkit, 2026-11-13: statistics, envelope, transition trace, scan timing,
+ *     and an EXPERIMENTAL purge-order variant TC69_DIAG_PURGE=after -- diag builds only)
  *
  * NOTE (kept on purpose, see firmware-audit.md §3.3): curr_matrix is zeroed on every
  * scan, so the release threshold branch never has an effect. The effective behaviour is
@@ -53,6 +55,38 @@ bool is_home_position(int i, int j) {
   return (i == 7) && (j == 2); // I often lean my left pinky on the A key
 }
 
+#if defined(TC69_DIAG_PURGE_AFTER)
+/*
+ * EXPERIMENTAL, diagnostic builds only (TC69_ADC_DIAG=yes TC69_DIAG_PURGE=after):
+ * the Arduino sense.ino order -- strobe and read first, purge afterwards, no purge
+ * after the column switch -- with sense.ino's 6 us purge (TC69_DIAG_PURGE_US).
+ * Used only to measure the leakage that fable-analog-report.md §6-1 predicts for
+ * this order (TC69 -6..-18 counts). Every diagnostic dump of this build says
+ * "purge=after" and prints a #WARN line. Not for normal use.
+ */
+#    ifndef TC69_ADC_DIAG
+#        error "TC69_DIAG_PURGE_AFTER is a diagnostic experiment and needs TC69_ADC_DIAG"
+#    endif
+void acquire_adc(int adc_measured_val[][MATRIX_ROWS]) {
+  for(int j=0; j<MATRIX_COLS; ++j) {
+    gpio_write_pin(CAP_COL_PINS[0], (j&1) ? true : false);
+    gpio_write_pin(CAP_COL_PINS[1], (j&2) ? true : false);
+    gpio_write_pin(CAP_COL_PINS[2], (j&4) ? true : false);
+    gpio_write_pin(CAP_COL_PINS[3], (j&8) ? true : false);
+    for(int i=0; i<MATRIX_ROWS; ++i) {
+       gpio_write_pin_high(CAP_ROW_PINS[i]);
+       wait_us(1);
+       adc_measured_val[j][i] = analogReadPin(CAP_SENSE);
+       gpio_write_pin_low(CAP_ROW_PINS[i]);
+
+       gpio_set_pin_output(CAP_PURGE);
+       gpio_write_pin_low(CAP_PURGE);
+       wait_us(TC69_DIAG_PURGE_US);
+       gpio_set_pin_input(CAP_PURGE);
+    }
+  }
+}
+#else
 void acquire_adc(int adc_measured_val[][MATRIX_ROWS]) {
   for(int j=0; j<MATRIX_COLS; ++j) {
     gpio_write_pin(CAP_COL_PINS[0], (j&1) ? true : false);
@@ -72,9 +106,12 @@ void acquire_adc(int adc_measured_val[][MATRIX_ROWS]) {
     }
   }
 }
+#endif /* TC69_DIAG_PURGE_AFTER */
 
 #ifdef TC69_ADC_DIAG
 static void adc_diag_init(void);
+static void adc_diag_scan_begin(void);
+static void adc_diag_scan_acquired(void);
 static void adc_diag_after_scan(void);
 #endif
 
@@ -126,7 +163,13 @@ void matrix_init(void) {
 
 uint8_t matrix_scan(void) {
     matrix_row_t curr_matrix[MATRIX_ROWS] = {0};
+#ifdef TC69_ADC_DIAG
+    adc_diag_scan_begin();
+#endif
     acquire_adc(adc_ring_buffer[adc_ring_index]);
+#ifdef TC69_ADC_DIAG
+    adc_diag_scan_acquired();
+#endif
     adc_ring_index = (adc_ring_index + 1) % ADC_RING_BUFFER_SIZE;
 
     for(int i=0; i<MATRIX_COLS; ++i) {
@@ -170,92 +213,10 @@ void matrix_print(void)
 }
 
 /* ------------------------------------------------------------------------
- * Raw-ADC diagnostics (only with TC69_ADC_DIAG; build with TC69_ADC_DIAG=yes)
- *
- * Read-only observer: it only reads adc_ring_buffer / calibration_val after the
- * judgement above has been done, and never changes thresholds or matrix state.
- * Every TC69_ADC_DIAG_INTERVAL_MS it prints over the QMK console (qmk console /
- * hid_listen), one block per dump:
- *
- *   #ADC seq=<n> t=<ms> scans=<scans in interval> scan_hz=<scans per second>
- *   CAL r<row>: <16 values>  calibration sum / 3  (= baseline, 10-bit counts)
- *   RAW r<row>: <16 values>  last single frame
- *   MIN r<row>: <16 values>  min single frame since the previous dump
- *   MAX r<row>: <16 values>  max single frame since the previous dump
- *   D3  r<row>: <16 values>  latest (3-frame sum - calibration sum); a key is
- *                            "pressed" when D3 > 360 (A key [r2,c7]: > 660)
- *   PRS r<row>: <hex>        matrix row bitmap after judgement (bit = column)
- *
- * Values are indexed by column 0..15 (4051 address), rows 0..4 (strobe).
+ * Raw-ADC diagnostics (only with TC69_ADC_DIAG; build with TC69_ADC_DIAG=yes).
+ * Read-only observer; output format and options are described in adc_diag_impl.h
+ * and ts52k docs/m1/. The normal build (TC69_ADC_DIAG off) compiles none of it.
  * ------------------------------------------------------------------------ */
 #ifdef TC69_ADC_DIAG
-#    include "print.h"
-#    include "timer.h"
-
-#    ifndef TC69_ADC_DIAG_INTERVAL_MS
-#        define TC69_ADC_DIAG_INTERVAL_MS 1000
-#    endif
-
-static int16_t  diag_min[MATRIX_COLS][MATRIX_ROWS];
-static int16_t  diag_max[MATRIX_COLS][MATRIX_ROWS];
-static uint32_t diag_last_dump;
-static uint32_t diag_scans;
-static uint32_t diag_seq;
-
-static void adc_diag_reset_minmax(void) {
-    for (int c = 0; c < MATRIX_COLS; ++c) {
-        for (int r = 0; r < MATRIX_ROWS; ++r) {
-            diag_min[c][r] = INT16_MAX;
-            diag_max[c][r] = INT16_MIN;
-        }
-    }
-}
-
-static void adc_diag_init(void) {
-    adc_diag_reset_minmax();
-    diag_last_dump = timer_read32();
-    diag_scans     = 0;
-    diag_seq       = 0;
-}
-
-static void adc_diag_after_scan(void) {
-    /* the frame just written is the one before the (already advanced) ring index */
-    int last = (adc_ring_index + ADC_RING_BUFFER_SIZE - 1) % ADC_RING_BUFFER_SIZE;
-
-    ++diag_scans;
-    for (int c = 0; c < MATRIX_COLS; ++c) {
-        for (int r = 0; r < MATRIX_ROWS; ++r) {
-            int v = adc_ring_buffer[last][c][r];
-            if (v < diag_min[c][r]) diag_min[c][r] = v;
-            if (v > diag_max[c][r]) diag_max[c][r] = v;
-        }
-    }
-
-    uint32_t elapsed = timer_elapsed32(diag_last_dump);
-    if (elapsed < TC69_ADC_DIAG_INTERVAL_MS) return;
-
-    uprintf("#ADC seq=%lu t=%lu scans=%lu scan_hz=%lu\n", (unsigned long)diag_seq, (unsigned long)timer_read32(), (unsigned long)diag_scans, (unsigned long)(diag_scans * 1000UL / (elapsed ? elapsed : 1)));
-    for (int r = 0; r < MATRIX_ROWS; ++r) {
-        uprintf("CAL r%d:", r);
-        for (int c = 0; c < MATRIX_COLS; ++c) uprintf(" %4d", calibration_val[c][r] / ADC_RING_BUFFER_SIZE);
-        uprintf("\nRAW r%d:", r);
-        for (int c = 0; c < MATRIX_COLS; ++c) uprintf(" %4d", adc_ring_buffer[last][c][r]);
-        uprintf("\nMIN r%d:", r);
-        for (int c = 0; c < MATRIX_COLS; ++c) uprintf(" %4d", diag_min[c][r]);
-        uprintf("\nMAX r%d:", r);
-        for (int c = 0; c < MATRIX_COLS; ++c) uprintf(" %4d", diag_max[c][r]);
-        uprintf("\nD3  r%d:", r);
-        for (int c = 0; c < MATRIX_COLS; ++c) {
-            int total = 0;
-            for (int k = 0; k < ADC_RING_BUFFER_SIZE; ++k) total += adc_ring_buffer[k][c][r];
-            uprintf(" %4d", total - calibration_val[c][r]);
-        }
-        uprintf("\nPRS r%d: %04X\n", r, matrix[r]);
-    }
-
-    ++diag_seq;
-    diag_scans     = 0;
-    diag_last_dump = timer_read32();
-    adc_diag_reset_minmax();
-}
+#    include "adc_diag_impl.h"
 #endif
